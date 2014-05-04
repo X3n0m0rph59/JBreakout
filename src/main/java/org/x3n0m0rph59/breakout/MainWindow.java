@@ -1,5 +1,9 @@
 package org.x3n0m0rph59.breakout;
 
+import org.x3n0m0rph59.breakout.SoundLayer.Sounds;
+
+import org.lwjgl.input.*;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
@@ -11,17 +15,31 @@ public class MainWindow {
 	
 	public MainWindow() {
 		this.initOpenGL();
+				
+		// Try to hide the cursor 
+		// not a problem if it fails
+		try {
+			Cursor emptyCursor = new Cursor(1, 1, 0, 0, 1, BufferUtils.createIntBuffer(1), null);
+			Mouse.setNativeCursor(emptyCursor);
+		} catch (LWJGLException e) {
+			e.printStackTrace();
+		}		
 		
 		this.scene = new Scene();
 	}
 	
 	public void show() {
-		while (!Display.isCloseRequested()) {
-			this.render();
+		SoundLayer.playSound(Sounds.WELCOME);		
+		
+		while (!Display.isCloseRequested()) {									
+			scene.step();
+			scene.render();
 			
 			Display.update();
 			Display.sync(60);
 		}
+		
+		SoundLayer.playSound(Sounds.QUIT);
 		
 		Display.destroy();
 	}
@@ -30,17 +48,22 @@ public class MainWindow {
 		try {
 			Display.setDisplayModeAndFullscreen(new DisplayMode(1024, 768));
 			Display.create();
-			Display.setVSyncEnabled(true);			
+			Display.setVSyncEnabled(true);
+			
+			GL11.glMatrixMode(GL11.GL_PROJECTION);
+			GL11.glLoadIdentity();
+			GL11.glViewport(0, 0, 1024, 768);
+			GL11.glOrtho(0, 1024, 768, 0, 0, 128);					
+			
+			GL11.glMatrixMode(GL11.GL_MODELVIEW);
+			GL11.glLoadIdentity();					
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 			System.exit(0);
-		}
-		
-		GL11.glClearColor(0.2f, 0.0f, 0.0f, 1.0f);
+		}			
 	}
 	
-	private void render() {
-		scene.render();
+	public Scene getScene() {
+		return scene;
 	}
-
 }
