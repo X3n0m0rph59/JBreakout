@@ -50,13 +50,24 @@ public class MainWindow {
 			Display.create();
 			Display.setVSyncEnabled(true);
 			
+			//GL11.glEnable(GL11.GL_TEXTURE_2D);
+			GL11.glShadeModel(GL11.GL_SMOOTH);       
+			GL11.glDisable(GL11.GL_DEPTH_TEST);
+			GL11.glDisable(GL11.GL_LIGHTING);
+			
+			GL11.glDisable(GL11.GL_BLEND);
+			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+			
+			GL11.glDisable(GL11.GL_CULL_FACE);
+			
 			GL11.glMatrixMode(GL11.GL_PROJECTION);
 			GL11.glLoadIdentity();
 			GL11.glViewport(0, 0, 1024, 768);
 			GL11.glOrtho(0, 1024, 768, 0, 0, 128);					
 			
 			GL11.glMatrixMode(GL11.GL_MODELVIEW);
-			GL11.glLoadIdentity();					
+			GL11.glLoadIdentity();		
+			
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 			System.exit(0);

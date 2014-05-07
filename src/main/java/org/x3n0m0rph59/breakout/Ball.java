@@ -16,9 +16,10 @@ public class Ball extends GameObject {
 			int numSegments = 100;
 			float angle;
 		  
-			for (int i = 0; i <= numSegments; i++) { // Last vertex same as first vertex
-				angle = (float) (i * 2.0f * Math.PI / numSegments);  // 360 deg for all segments
-				GL11.glVertex2f((float) (Math.cos(angle) * radius) + x, (float) (Math.sin(angle) * radius) + y);
+			for (int i = 0; i <= numSegments; i++) {
+				angle = (float) (i * 2.0f * Math.PI / numSegments);
+				GL11.glVertex2f((float) (Math.cos(angle) * radius) + x, 
+								(float) (Math.sin(angle) * radius) + y);
 			}
 		GL11.glEnd();		   
 	}
@@ -31,7 +32,7 @@ public class Ball extends GameObject {
 
 	@Override
 	public Rectangle getBoundingBox() {
-		return new Rectangle(x, y, 15f, 15f);
+		return new Rectangle(x, y, 10f, 10f);
 	}
 	
 	public void invertXVelocity() {

@@ -5,7 +5,7 @@ import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.geom.Rectangle;
 
 public class Paddle extends GameObject {
-	protected float x,y,width = 100,height = 20;
+	protected float x, y, width = 75, height = 15;
 	
 	@Override
 	public void render() {
@@ -34,5 +34,13 @@ public class Paddle extends GameObject {
 	@Override
 	public Rectangle getBoundingBox() {		
 		return new Rectangle(x, y, width, height);
+	}
+	
+	public void expand() {
+		this.width += 25f;
+	}
+	
+	public void shrink() {
+		this.width -= 25f;
 	}
 }
