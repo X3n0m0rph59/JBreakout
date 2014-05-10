@@ -7,6 +7,13 @@ public class Ball extends GameObject {
 	private float x,y,radius = 10;
 	private float velX = 1.5f, velY = 5.5f;
 	
+	private boolean destroyed = false; 
+	
+	public Ball(float x, float y) {
+		this.x = x;
+		this.y = y;
+	}
+	
 	@Override
 	public void render() {
 		GL11.glBegin(GL11.GL_TRIANGLE_FAN);			
@@ -46,5 +53,13 @@ public class Ball extends GameObject {
 	public void setPosition(float x, float y) {
 		this.x = x;
 		this.y = y;
+	}
+
+	public boolean isDestroyed() {
+		return destroyed;
+	}
+	
+	public void setDestroyed(boolean b) {
+		destroyed = b;
 	}
 }

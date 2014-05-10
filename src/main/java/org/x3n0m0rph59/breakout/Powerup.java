@@ -38,6 +38,10 @@ public class Powerup extends GameObject {
 			case SHRINK_PADDLE:
 				GL11.glColor3f(0.40f, 0.40f, 1.0f);
 				break;
+			case STICKY_BALL:
+				GL11.glColor3f(0.0f, 0.0f, 1.0f);
+				break;
+				
 			default:
 				throw new RuntimeException("Unsupported EffectType: " + type);		
 			}

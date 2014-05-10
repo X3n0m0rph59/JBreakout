@@ -5,16 +5,22 @@ import java.util.Iterator;
 import java.util.List;
 
 enum EffectType {
+					// Special effects/abilities
 					FIREBALL,
 					MULTIBALL,
 					ENLARGE_PADDLE, 
 					SHRINK_PADDLE, 
 					CLOSED_BOTTOM, 
-					PADDLE_GUN
+					PADDLE_GUN,
+					STICKY_BALL,
 					
+					// Bonuses
+					// NEW_BALL,
+					// SCORE_BOOST,
+					
+					// TODO:
 					// game speed up/slow down
 					// 2d movement of paddle
-					// glue
 					// multi paddle
 					// new ball
 				};
@@ -28,23 +34,33 @@ class Effect {
 		this.type = type;
 		this.effectDuration = effectDuration;
 		
-		// Apply effect
-		switch (type) {
-		case CLOSED_BOTTOM:
-			break;
+		// Apply effect (if applicable)
+		switch (type) {		
 		case ENLARGE_PADDLE:
 			App.getMainWindow().getScene().getPaddle().expand();
+			break;		
+		
+		case MULTIBALL:
+			App.getMainWindow().getScene().spawnBall();
 			break;
+			
+		case CLOSED_BOTTOM:
+			break;
+			
 		case FIREBALL:
 			break;
-		case MULTIBALL:
-			break;
+			
 		case PADDLE_GUN:
 			break;
+			
 		case SHRINK_PADDLE:
 			break;
+			
+		case STICKY_BALL:
+			break;
+			
 		default:
-			throw new RuntimeException("Unsupported EffectType: " + type);		
+			throw new RuntimeException("Unsupported EffectType: " + type);
 		}
 	}
 	
@@ -79,17 +95,26 @@ class Effect {
 		switch (type) {
 		case CLOSED_BOTTOM:
 			break;
+			
 		case ENLARGE_PADDLE:
 			App.getMainWindow().getScene().getPaddle().shrink();
 			break;
+			
 		case FIREBALL:
 			break;
+			
 		case MULTIBALL:
 			break;
+			
 		case PADDLE_GUN:
 			break;
+			
 		case SHRINK_PADDLE:
 			break;
+			
+		case STICKY_BALL:
+			break;
+			
 		default:
 			throw new RuntimeException("Unsupported EffectType: " + type);		
 		}
@@ -98,7 +123,7 @@ class Effect {
 
 public final class EffectManager {
 	private static final EffectManager instance = new EffectManager();	
-	List<Effect> effectList = new ArrayList<Effect>();
+	private List<Effect> effectList = new ArrayList<Effect>();
 	
 	public EffectManager() {
 		
@@ -125,6 +150,9 @@ public final class EffectManager {
 			break;
 		case SHRINK_PADDLE:
 			App.getMainWindow().getScene().addTextAnimation("Shrink!");
+			break;			
+		case STICKY_BALL:
+			App.getMainWindow().getScene().addTextAnimation("Sticky Ball!");
 			break;
 		default:
 			throw new RuntimeException("Unsupported type: " + type);		
@@ -154,6 +182,13 @@ public final class EffectManager {
 				i.remove();
 			}
 		}
+	}
+	
+	public void clearEffects() {
+		for (Effect e : effectList)
+			e.expire();
+		
+		effectList.clear();
 	}
 	
 	public static EffectManager getInstance() {

@@ -18,9 +18,7 @@ public class TextAnimation extends GameObject {
 	
 	public TextAnimation(String text) {
 		this.text = text;
-		
-		Font f = new Font("Arial", Font.BOLD, 44);
-		font = new TrueTypeFont(f, true);
+		font = FontLoader.getInstance().getFont("Arial", Font.BOLD, 44);
 	}
 	
 	@Override

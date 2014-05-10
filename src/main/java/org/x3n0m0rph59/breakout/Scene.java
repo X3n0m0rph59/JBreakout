@@ -14,38 +14,43 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.TrueTypeFont;
 
 public final class Scene {
-	enum State {GREETING, WAITING_FOR_BALL, RUNNING, RESTART, PAUSED, TERMINATED};
+	enum State {GREETING, WAITING_FOR_BALL, RUNNING, LEVEL_COMPLETE, RESTART, PAUSED, TERMINATED};
 	private State state = State.GREETING;
 	
-	private ScoreBoard scoreBoard = new ScoreBoard();
-	private Ball ball = new Ball();
-	private Paddle paddle = new Paddle();
+	private ScoreBoard scoreBoard = new ScoreBoard();	
 	
 	private int level = 0;
-	private int ballsLeft = 0;
-	private int score; 
+	private int ballsLeft = 3;
+	private int score = 0; 
 	
+	private Paddle paddle = new Paddle();
+	private List<Ball> balls = new ArrayList<Ball>();
 	private List<Brick> bricks = new ArrayList<Brick>();
 	private List<Powerup> powerups = new ArrayList<Powerup>();
 	private List<Particle> particles = new ArrayList<Particle>();
+	private List<Projectile> projectiles = new ArrayList<Projectile>();	
 	private List<TextAnimation> textAnimations = new ArrayList<TextAnimation>();
 		
 	private TrueTypeFont font;
 	
+	private int frameCounter = 0;
+	
 	public Scene() {
-		Font awtFont = new Font("Arial", Font.BOLD, 44);
-		font = new TrueTypeFont(awtFont, true);
+		font = FontLoader.getInstance().getFont("Arial", Font.BOLD, 44);
 		
 		initLevel(0);						
 	}
 	
-	private void initLevel(int level) {
-		ballsLeft += 3;
-		score = 0;
+	private void initLevel(int level) {	
+		powerups.clear();
+		projectiles.clear();
+		
+		EffectManager.getInstance().clearEffects();
 		
 		bricks = LevelLoader.loadLevel(level);
 		
-		ball.setPosition(Config.BALL_SPAWN_X, Config.BALL_SPAWN_Y);
+		balls.clear();
+		balls.add(new Ball(Config.BALL_SPAWN_X, Config.BALL_SPAWN_Y));		
 	}
 
 	public void render() {
@@ -64,7 +69,33 @@ public final class Scene {
 			p.render();
 		}
 		
-		ball.render();
+		for (Projectile p : projectiles) {
+			p.render();
+		}
+
+		for (Ball b : balls) {
+			b.render();
+		}
+		
+		// Draw a wall on the bottom of the screen?
+		if (EffectManager.getInstance().isEffectActive(EffectType.CLOSED_BOTTOM)) {
+			for (int i = 0; i <= 22; i++) {
+				float x = (i * 45) + 0;
+				float y = 750;
+				
+				final float width = 40;
+				final float height = 25;
+				
+				GL11.glBegin(GL11.GL_QUADS);
+					GL11.glColor3f(1.0f, 0.0f, 0.0f);			
+					GL11.glVertex2f(x, y);			
+					GL11.glVertex2f(x + width, y);			
+					GL11.glVertex2f(x + width, y + height);			
+					GL11.glVertex2f(x, y + height);
+				GL11.glEnd();
+			}
+		}
+		
 		paddle.render();
 		
 		scoreBoard.render();
@@ -113,7 +144,7 @@ public final class Scene {
 			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 			font.drawString(200, 300, "Press mouse button to resume", Color.white);
 			GL11.glDisable(GL11.GL_BLEND);
-			break;					
+			break;
 			
 		case WAITING_FOR_BALL:
 			GL11.glEnable(GL11.GL_BLEND);
@@ -132,6 +163,24 @@ public final class Scene {
 			GL11.glDisable(GL11.GL_BLEND);
 			break;
 			
+		case LEVEL_COMPLETE:
+			GL11.glEnable(GL11.GL_BLEND);
+			GL11.glBlendFunc(GL11.GL_ONE_MINUS_SRC_COLOR, GL11.GL_ONE_MINUS_DST_COLOR);
+			
+			GL11.glBegin(GL11.GL_QUADS);
+				GL11.glColor4f(0.0f, 0.0f, 0.0f, 0.25f);
+				GL11.glVertex2f(0, 0);			
+				GL11.glVertex2f(1024, 0);			
+				GL11.glVertex2f(1024, 768);			
+				GL11.glVertex2f(0, 768);
+			GL11.glEnd();
+									
+			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+			font.drawString(350, 300, "Stage " + (level + 1) + " finished!", Color.white);
+			font.drawString(200, 400, "Press Mouse Button to continue", Color.white);
+			GL11.glDisable(GL11.GL_BLEND);
+			break;
+						
 		case TERMINATED:
 			break;
 			
@@ -141,6 +190,8 @@ public final class Scene {
 	}
 	
 	public void step() {
+		frameCounter++;
+		
 		processKeyboardEvents();
 		
 		switch (state) {
@@ -156,6 +207,17 @@ public final class Scene {
 			
 		case PAUSED:
 			if (Mouse.isButtonDown(0) || Mouse.isButtonDown(1)) {
+				setState(State.RUNNING);
+			}
+			
+			if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
+				setState(State.TERMINATED);
+			}
+			break;
+			
+		case LEVEL_COMPLETE:
+			if (Mouse.isButtonDown(0) || Mouse.isButtonDown(1)) {
+				initLevel(++level);
 				setState(State.RUNNING);
 			}
 			
@@ -191,11 +253,18 @@ public final class Scene {
 				p.step();
 			}
 			
+			for (Projectile p : projectiles) {
+				p.step();
+			}
+			
 			for (TextAnimation a : textAnimations) {
 				a.step();
 			}
 			
-			ball.step();
+			for (Ball b : balls) {
+				b.step();
+			}
+			
 			paddle.step();
 			
 			doCollisionDetection();
@@ -204,6 +273,22 @@ public final class Scene {
 			// Spawn new particles
 			for (int i = 0; i < 2; i++) {
 				particles.add(new Particle(Util.random(0, 1024), 0f, Util.random(5, 15)));
+			}
+			
+			// Spawn new projectiles?
+			if (EffectManager.getInstance().isEffectActive(EffectType.PADDLE_GUN)) {
+				if (Mouse.isButtonDown(0) && (frameCounter % 4 == 0)) {
+					for (int i = 0; i < 2; i++) {
+						float x = (frameCounter % 8 == 0) ? paddle.getX() : 
+															paddle.getX() + paddle.getWidth() - 10; 
+						projectiles.add(new Projectile(x, paddle.getY()));
+					}
+				}
+			}
+			
+			// Stage cleared?			
+			if (bricks.isEmpty()) {
+				setState(State.LEVEL_COMPLETE);
 			}
 			break;
 			
@@ -218,6 +303,9 @@ public final class Scene {
 			
 		case WAITING_FOR_BALL:
 			if (Mouse.isButtonDown(0) || Mouse.isButtonDown(1)) {
+				balls.clear();
+				spawnBall();
+				
 				setState(State.RUNNING);
 			}
 			
@@ -237,34 +325,49 @@ public final class Scene {
 		
 	public void doCollisionDetection() {
 		// Ball vs. Edges
-		if (ball.getBoundingBox().getX() <= 0 || ball.getBoundingBox().getX() >= 1024) {
-			ball.invertXVelocity();
-			
-			SoundLayer.playSound(Sounds.WALL_HIT);
+		for (Ball ball : balls) {
+			if (ball.getBoundingBox().getX() <= 0 || ball.getBoundingBox().getX() >= 1024) {
+				ball.invertXVelocity();
+				
+				SoundLayer.playSound(Sounds.WALL_HIT);
+			}
 		}
-		
-		if (ball.getBoundingBox().getY() <= 0) {
-			ball.invertYVelocity();
-			
-			SoundLayer.playSound(Sounds.WALL_HIT);
+
+		for (Ball ball : balls) {
+			if (ball.getBoundingBox().getY() <= 0 || 
+				(EffectManager.getInstance().isEffectActive(EffectType.CLOSED_BOTTOM)) && 
+				 ball.getBoundingBox().getY() >= 768) {
+				ball.invertYVelocity();
+				
+				SoundLayer.playSound(Sounds.WALL_HIT);
+			}
 		}
 		
 		// Ball lost?
-		if (ball.getBoundingBox().getY() >= 768) {
-			ballLost();
+		Iterator<Ball> bi = balls.iterator();
+		while (bi.hasNext()) {			
+			Ball ball = bi.next();
+			if (ball.getBoundingBox().getY() >= 768 && 
+				!EffectManager.getInstance().isEffectActive(EffectType.CLOSED_BOTTOM)) {
+				ballLost(bi);
+			}
 		}
 		
 		// Ball vs. Paddle
-		if (Util.collisionTest(paddle.getBoundingBox(), ball.getBoundingBox())) {
-			ball.invertYVelocity();
-			
-			SoundLayer.playSound(Sounds.PADDLE_HIT);
+		for (Ball ball : balls) {
+			if (Util.collisionTest(paddle.getBoundingBox(), ball.getBoundingBox())) {
+				ball.invertYVelocity();
+				
+				SoundLayer.playSound(Sounds.PADDLE_HIT);
+			}
 		}
 		
 		// Ball vs. Bricks
-		for (Brick b : bricks) {
-			if (Util.collisionTest(ball.getBoundingBox(), b.getBoundingBox())) {
-				brickHit(b);
+		for (Ball ball : balls) {
+			for (Brick b : bricks) {
+				if (Util.collisionTest(ball.getBoundingBox(), b.getBoundingBox())) {
+					brickHit(b, ball, false);
+				}
 			}
 		}
 		
@@ -275,42 +378,81 @@ public final class Scene {
 				p.setDestroyed(true);
 			}
 		}
+		
+		// Projectile vs. Bricks
+		for (Brick b : bricks) {
+			for (Projectile p : projectiles) {
+				if (Util.collisionTest(p.getBoundingBox(), b.getBoundingBox())) {
+					brickHit(b, null, true);
+					p.setDestroyed(true);
+				}
+			}
+		}
 	}
 
-	private void brickHit(Brick b) {
+	private void brickHit(Brick b, Ball ball, boolean hitByProjectile) {
 		b.hit();
 		
-		// Reflect the ball?
-		if (!EffectManager.getInstance().isEffectActive(EffectType.FIREBALL) &&
-			b.getType() != Brick.Type.WEAK) {
+		if (hitByProjectile) {
+			if (b.getType() != Brick.Type.SOLID) {
+				score += 100;		
+			}
 			
-			ball.invertXVelocity();
-			ball.invertYVelocity();
+			if (b.getType() == Brick.Type.POWERUP) {
+				score += 1000;			
+				spawnPowerup(b.getX(), b.getY(), 
+							 EffectType.values()[Util.random(0, EffectType.values().length - 1)]);
+			}
 		}
-		
-		if (b.getType() != Brick.Type.SOLID) {
-			score += 100;		
-		}
-		
-		if (b.getType() == Brick.Type.POWERUP) {
-			score += 1000;			
-			spawnPowerup(b.getX(), b.getY(), 
-						 EffectType.values()[Util.random(0, EffectType.values().length - 1)]);
+		else {
+			// Reflect the ball?			
+			if (!EffectManager.getInstance().isEffectActive(EffectType.FIREBALL) &&
+				b.getType() != Brick.Type.WEAK) {
+				
+				ball.invertXVelocity();
+				ball.invertYVelocity();
+			}			
+			
+			if (b.getType() != Brick.Type.SOLID) {
+				score += 100;		
+			}
+			
+			if (b.getType() == Brick.Type.POWERUP) {
+				score += 1000;			
+				spawnPowerup(b.getX(), b.getY(), 
+							 EffectType.values()[Util.random(0, EffectType.values().length - 1)]);
+			}
 		}
 	}
 
-	private void ballLost() {
+	public void spawnBall() {
+		balls.add(new Ball(Config.BALL_SPAWN_X, Config.BALL_SPAWN_Y));
+	}
+	
+	private void ballLost(Iterator<Ball> bi) {
 		ballsLeft--;
 		score -= 1000;
 		
-		ball.setPosition(Config.BALL_SPAWN_X, Config.BALL_SPAWN_Y);
-		
-		setState(State.WAITING_FOR_BALL);
+		bi.remove();
+
+		if (balls.isEmpty()) {
+			EffectManager.getInstance().clearEffects();
+			setState(State.WAITING_FOR_BALL);
+		}			
 		
 		SoundLayer.playSound(Sounds.BALL_LOST);
 	}
 	
-	public void doCleanup() {
+	public void doCleanup() {		
+		Iterator<Ball> bai = balls.iterator();		
+		while (bai.hasNext()) {
+			Ball ball = bai.next();
+			
+			if (ball.isDestroyed()) {
+				bai.remove();
+			}
+		}
+		
 		Iterator<Brick> i = bricks.iterator();		
 		while (i.hasNext()) {
 			Brick b = i.next();
@@ -337,6 +479,16 @@ public final class Scene {
 			
 			if (p.isDestroyed() || p.getY() >= 768) {
 				pui.remove();
+			}
+		}
+		
+		// Remove projectiles
+		Iterator<Projectile> pri = projectiles.iterator();		
+		while (pri.hasNext()) {
+			Projectile p = pri.next();
+			
+			if (p.isDestroyed() || p.getY() <= 0) {
+				pri.remove();
 			}
 		}	
 		
