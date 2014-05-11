@@ -15,13 +15,13 @@ import org.newdawn.slick.TrueTypeFont;
 import org.newdawn.slick.geom.Rectangle;
 
 public final class Scene {
-	enum State { GREETING, WAITING_FOR_BALL, RUNNING, STAGE_CLEARED, RESTART, PAUSED, TERMINATED };
+	enum State {GREETING, WAITING_FOR_BALL, RUNNING, STAGE_CLEARED, RESTART, PAUSED, TERMINATED};
 	private State state = State.GREETING;
 	
 	private ScoreBoard scoreBoard = new ScoreBoard();	
 	
 	private int level = 0;
-	private int ballsLeft = 3;
+	private int ballsLeft = Config.INITIAL_BALLS_LEFT;
 	private int score = 0; 
 	
 	private Paddle paddle = new Paddle();
@@ -37,7 +37,7 @@ public final class Scene {
 	private int frameCounter = 0;
 	
 	public Scene() {
-		font = FontLoader.getInstance().getFont("Verdana", Font.BOLD, 44);
+		font = FontLoader.getInstance().getFont("Verdana", Font.BOLD, Config.TOAST_FONT_SIZE);
 		
 		initLevel(0);						
 	}
@@ -52,6 +52,37 @@ public final class Scene {
 		
 		balls.clear();
 		balls.add(new Ball(Config.BALL_SPAWN_X, Config.BALL_SPAWN_Y));		
+	}
+	
+	private void drawCenteredText(String[] lines, boolean eraseBackground) {
+		GL11.glEnable(GL11.GL_BLEND);
+		
+		if (eraseBackground)
+		{
+			GL11.glBlendFunc(GL11.GL_ONE_MINUS_SRC_COLOR, GL11.GL_ONE_MINUS_DST_COLOR);
+			
+			GL11.glBegin(GL11.GL_QUADS);
+				GL11.glColor4f(0.0f, 0.0f, 0.0f, 0.25f);
+				GL11.glVertex2f(0, 0);			
+				GL11.glVertex2f(Config.SCREEN_WIDTH, 0);			
+				GL11.glVertex2f(Config.SCREEN_WIDTH, Config.SCREEN_HEIGHT);			
+				GL11.glVertex2f(0, Config.SCREEN_HEIGHT);
+			GL11.glEnd();
+		}
+								
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		
+		int cnt = 0;
+		for (String line : lines) {
+			int width = font.getWidth(line);
+			int height = font.getLineHeight() + 5;
+			
+			font.drawString(Config.SCREEN_WIDTH / 2 - width / 2, (height * cnt) + Config.SCREEN_HEIGHT / 2, line, Color.white);
+			cnt++;
+		}
+		
+		
+		GL11.glDisable(GL11.GL_BLEND);
 	}
 
 	public void render() {
@@ -80,21 +111,7 @@ public final class Scene {
 		
 		// Draw a wall on the bottom of the screen?
 		if (EffectManager.getInstance().isEffectActive(EffectType.CLOSED_BOTTOM)) {
-			for (int i = 0; i <= 22; i++) {
-				float x = (i * 45) + 0;
-				float y = 750;
-				
-				final float width = 40;
-				final float height = 25;
-				
-				GL11.glBegin(GL11.GL_QUADS);
-					GL11.glColor3f(1.0f, 0.0f, 0.0f);			
-					GL11.glVertex2f(x, y);			
-					GL11.glVertex2f(x + width, y);			
-					GL11.glVertex2f(x + width, y + height);			
-					GL11.glVertex2f(x, y + height);
-				GL11.glEnd();
-			}
+			drawBottomWall();
 		}
 		
 		paddle.render();
@@ -107,82 +124,30 @@ public final class Scene {
 				
 		switch (state) {
 		case GREETING:
-			GL11.glEnable(GL11.GL_BLEND);
-			GL11.glBlendFunc(GL11.GL_ONE_MINUS_SRC_COLOR, GL11.GL_ONE_MINUS_DST_COLOR);
-			
-			GL11.glBegin(GL11.GL_QUADS);
-				GL11.glColor4f(0.0f, 0.0f, 0.0f, 0.25f);
-				GL11.glVertex2f(0, 0);			
-				GL11.glVertex2f(1024, 0);			
-				GL11.glVertex2f(1024, 768);			
-				GL11.glVertex2f(0, 768);
-			GL11.glEnd();
-									
-			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			font.drawString(190, 400, "Press mouse button to start", Color.white);
-			
-			GL11.glDisable(GL11.GL_BLEND);
+			drawCenteredText(new String[] {"Press mouse button to start"}, true);
 			break;
 			
 		case RUNNING:			
 			break;
 			
-		case RESTART:			
+		case RESTART:
+			drawCenteredText(new String[] {"Restarting stage"}, true);
 			break;
 			
 		case PAUSED:
-			GL11.glEnable(GL11.GL_BLEND);
-			GL11.glBlendFunc(GL11.GL_ONE_MINUS_SRC_COLOR, GL11.GL_ONE_MINUS_DST_COLOR);
-			
-			GL11.glBegin(GL11.GL_QUADS);
-				GL11.glColor4f(0.0f, 0.0f, 0.0f, 0.25f);
-				GL11.glVertex2f(0, 0);			
-				GL11.glVertex2f(1024, 0);			
-				GL11.glVertex2f(1024, 768);			
-				GL11.glVertex2f(0, 768);
-			GL11.glEnd();
-									
-			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			font.drawString(180, 400, "Press mouse button to resume", Color.white);
-			GL11.glDisable(GL11.GL_BLEND);
+			drawCenteredText(new String[] {"GAME PAUSED", "Press mouse button to resume"}, true);
 			break;
 			
 		case WAITING_FOR_BALL:
-			GL11.glEnable(GL11.GL_BLEND);
-			GL11.glBlendFunc(GL11.GL_ONE_MINUS_SRC_COLOR, GL11.GL_ONE_MINUS_DST_COLOR);
-			
-			GL11.glBegin(GL11.GL_QUADS);
-				GL11.glColor4f(0.0f, 0.0f, 0.0f, 0.25f);
-				GL11.glVertex2f(0, 0);			
-				GL11.glVertex2f(1024, 0);			
-				GL11.glVertex2f(1024, 768);			
-				GL11.glVertex2f(0, 768);
-			GL11.glEnd();
-									
-			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			font.drawString(100, 400, "Press mouse button for a new ball", Color.white);
-			GL11.glDisable(GL11.GL_BLEND);
+			drawCenteredText(new String[] {"BALL LOST", "Press mouse button for a new ball"}, true);
 			break;
 			
 		case STAGE_CLEARED:
-			GL11.glEnable(GL11.GL_BLEND);
-			GL11.glBlendFunc(GL11.GL_ONE_MINUS_SRC_COLOR, GL11.GL_ONE_MINUS_DST_COLOR);
-			
-			GL11.glBegin(GL11.GL_QUADS);
-				GL11.glColor4f(0.0f, 0.0f, 0.0f, 0.25f);
-				GL11.glVertex2f(0, 0);			
-				GL11.glVertex2f(1024, 0);			
-				GL11.glVertex2f(1024, 768);			
-				GL11.glVertex2f(0, 768);
-			GL11.glEnd();
-									
-			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			font.drawString(350, 300, "Stage " + (level + 1) + " cleared!", Color.white);
-			font.drawString(180, 400, "Press Mouse Button to continue", Color.white);
-			GL11.glDisable(GL11.GL_BLEND);
+			drawCenteredText(new String[] {"Stage " + (level + 1) + " cleared", "Press mouse button to continue"}, true);
 			break;
 						
 		case TERMINATED:
+			drawCenteredText(new String[] {"Good bye!"}, true);
 			break;
 			
 		default:
@@ -212,16 +177,34 @@ public final class Scene {
 //		drawRect(bottom);
 //		drawRect(bottom_left);
 	}
-	
-	public void drawRect(Rectangle r) {
-		GL11.glBegin(GL11.GL_QUADS);
-			GL11.glColor4f(1.0f, 0.0f, 0.0f, 0.8f);
-			GL11.glVertex2f(r.getX(), r.getY());			
-			GL11.glVertex2f(r.getX() + r.getWidth(), r.getY());			
-			GL11.glVertex2f(r.getX() + r.getWidth(), r.getY() + r.getHeight());			
-			GL11.glVertex2f(r.getX(), r.getY() + r.getHeight());
-		GL11.glEnd();
+
+	private void drawBottomWall() {
+		for (int i = 0; i <= Config.SCREEN_WIDTH / Config.BOTTOM_WALL_SEGMENT_WIDTH; i++) {
+			float x = i * (Config.BOTTOM_WALL_SEGMENT_WIDTH + Config.BOTTOM_WALL_SEGMENT_SPACING);
+			float y = Config.SCREEN_HEIGHT - Config.BOTTOM_WALL_HEIGHT;
+			
+			final float width = Config.BOTTOM_WALL_SEGMENT_WIDTH;
+			final float height = Config.BOTTOM_WALL_SEGMENT_HEIGHT;
+			
+			GL11.glBegin(GL11.GL_QUADS);
+				GL11.glColor3f(1.0f, 0.0f, 0.0f);			
+				GL11.glVertex2f(x, y);			
+				GL11.glVertex2f(x + width, y);			
+				GL11.glVertex2f(x + width, y + height);			
+				GL11.glVertex2f(x, y + height);
+			GL11.glEnd();
+		}
 	}
+	
+//	private void drawRect(Rectangle r) {
+//		GL11.glBegin(GL11.GL_QUADS);
+//			GL11.glColor4f(1.0f, 0.0f, 0.0f, 0.8f);
+//			GL11.glVertex2f(r.getX(), r.getY());			
+//			GL11.glVertex2f(r.getX() + r.getWidth(), r.getY());			
+//			GL11.glVertex2f(r.getX() + r.getWidth(), r.getY() + r.getHeight());			
+//			GL11.glVertex2f(r.getX(), r.getY() + r.getHeight());
+//		GL11.glEnd();
+//	}
 	
 	public void step() {
 		frameCounter++;
@@ -306,15 +289,17 @@ public final class Scene {
 			
 			// Spawn new particles
 			for (int i = 0; i < 2; i++) {
-				particles.add(new Particle(Util.random(0, 1024), 0f, Util.random(5, 15)));
+				particles.add(new Particle(Util.random(0, (int) Config.SCREEN_WIDTH), 0f, 
+													   Util.random((int) Config.PARTICLE_MIN_SPEED, 
+															       (int) Config.PARTICLE_MAX_SPEED)));
 			}
 			
 			// Spawn new projectiles?
 			if (EffectManager.getInstance().isEffectActive(EffectType.PADDLE_GUN)) {
-				if (Mouse.isButtonDown(0) && (frameCounter % 4 == 0)) {
+				if (Mouse.isButtonDown(0) && (frameCounter % Config.PROJECTILE_FIRE_RATE == 0)) {
 					for (int i = 0; i < 2; i++) {
-						float x = (frameCounter % 8 == 0) ? paddle.getX() : 
-															paddle.getX() + paddle.getWidth() - 10; 
+						float x = (frameCounter % (Config.PROJECTILE_FIRE_RATE * 2) == 0) ? 
+								paddle.getX() : paddle.getX() + paddle.getWidth() - Config.PROJECTILE_WIDTH; 
 						projectiles.add(new Projectile(x, paddle.getY()));
 					}
 				}
@@ -377,7 +362,7 @@ public final class Scene {
 	public void doCollisionDetection() {
 		// Ball vs. Edges
 		for (Ball ball : balls) {
-			if (ball.getBoundingBox().getX() <= 0 || ball.getBoundingBox().getX() >= 1024) {
+			if (ball.getBoundingBox().getX() <= 0 || ball.getBoundingBox().getX() >= Config.SCREEN_WIDTH) {
 				ball.invertXVelocity();
 				
 				SoundLayer.playSound(Sounds.WALL_HIT);
@@ -387,7 +372,7 @@ public final class Scene {
 		for (Ball ball : balls) {
 			if (ball.getBoundingBox().getY() <= 0 || 
 				(EffectManager.getInstance().isEffectActive(EffectType.CLOSED_BOTTOM)) && 
-				 ball.getBoundingBox().getY() >= 768 - 25) {
+				 ball.getBoundingBox().getY() >= Config.SCREEN_HEIGHT - Config.BOTTOM_WALL_HEIGHT) {
 				ball.invertYVelocity();
 				
 				SoundLayer.playSound(Sounds.WALL_HIT);
@@ -398,7 +383,7 @@ public final class Scene {
 		Iterator<Ball> bi = balls.iterator();
 		while (bi.hasNext()) {			
 			Ball ball = bi.next();
-			if (ball.getBoundingBox().getY() >= 768 && 
+			if (ball.getBoundingBox().getY() >= Config.SCREEN_HEIGHT && 
 				!EffectManager.getInstance().isEffectActive(EffectType.CLOSED_BOTTOM)) {
 				ballLost(bi);
 			}
@@ -595,7 +580,7 @@ public final class Scene {
 		while (pi.hasNext()) {
 			Particle p = pi.next();
 			
-			if (p.getY() >= 768) {
+			if (p.getY() >= Config.SCREEN_HEIGHT) {
 				pi.remove();
 			}
 		}
@@ -605,7 +590,7 @@ public final class Scene {
 		while (pui.hasNext()) {
 			Powerup p = pui.next();
 			
-			if (p.isDestroyed() || p.getY() >= 768) {
+			if (p.isDestroyed() || p.getY() >= Config.SCREEN_HEIGHT) {
 				pui.remove();
 			}
 		}
@@ -653,7 +638,7 @@ public final class Scene {
 	public void addTextAnimation(String text) {
 		textAnimations.add(new TextAnimation(text));
 	}
-
+	
 	public int getBallsLeft() {
 		return ballsLeft;
 	}

@@ -5,8 +5,8 @@ import org.newdawn.slick.geom.Rectangle;
 import org.x3n0m0rph59.breakout.SoundLayer.Sounds;
 
 public class Brick extends GameObject {	
-	public enum Type { NORMAL, WEAK, HARD, SOLID, POWERUP };
-	public enum Action { REFLECT, PASS };
+	public enum Type {NORMAL, WEAK, HARD, SOLID, POWERUP};
+	public enum Action {REFLECT, PASS};
 	
 	private float x, y, width, height;
 	private boolean destroyed = false;
@@ -114,7 +114,7 @@ public class Brick extends GameObject {
 			
 		case HARD:
 			hitCounter++;
-			if (hitCounter >= 3)
+			if (hitCounter >= Config.HARD_BRICK_HITS_NEEDED)
 			{
 				SoundLayer.playSound(Sounds.BRICK_DESTROYED);
 				destroyed = true;

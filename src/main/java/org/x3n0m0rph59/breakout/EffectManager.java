@@ -13,16 +13,16 @@ enum EffectType {
 					CLOSED_BOTTOM, 
 					PADDLE_GUN,
 					STICKY_BALL,
+					SPEED_UP,
+					SLOW_DOWN,
 					
 					// Bonuses
 					// NEW_BALL,
 					// SCORE_BOOST,
 					
 					// TODO:
-					// game speed up/slow down
 					// 2d movement of paddle
 					// multi paddle
-					// new ball
 				};
 
 class Effect {
@@ -57,6 +57,14 @@ class Effect {
 			break;
 			
 		case STICKY_BALL:
+			break;
+			
+		case SPEED_UP:
+			Config.getInstance().increaseGameSpeed(Config.POWERUP_SPEEDUP_FACTOR);
+			break;
+			
+		case SLOW_DOWN:
+			Config.getInstance().decreaseGameSpeed(Config.POWERUP_SLOWDOWN_FACTOR);
 			break;
 			
 		default:
@@ -115,6 +123,14 @@ class Effect {
 		case STICKY_BALL:
 			break;
 			
+		case SPEED_UP:
+			Config.getInstance().decreaseGameSpeed(Config.POWERUP_SPEEDUP_FACTOR);
+			break;
+			
+		case SLOW_DOWN:
+			Config.getInstance().increaseGameSpeed(Config.POWERUP_SLOWDOWN_FACTOR);
+			break;
+			
 		default:
 			throw new RuntimeException("Unsupported EffectType: " + type);		
 		}
@@ -136,24 +152,39 @@ public final class EffectManager {
 		case CLOSED_BOTTOM:
 			App.getMainWindow().getScene().addTextAnimation("Closed bottom!");
 			break;
+			
 		case ENLARGE_PADDLE:
 			App.getMainWindow().getScene().addTextAnimation("Enlarge!");
 			break;
+			
 		case FIREBALL:
 			App.getMainWindow().getScene().addTextAnimation("Fireball!");
 			break;
+			
 		case MULTIBALL:
 			App.getMainWindow().getScene().addTextAnimation("Multiball");
 			break;
+			
 		case PADDLE_GUN:
 			App.getMainWindow().getScene().addTextAnimation("Guns!");
 			break;
+			
 		case SHRINK_PADDLE:
 			App.getMainWindow().getScene().addTextAnimation("Shrink!");
-			break;			
+			break;	
+			
 		case STICKY_BALL:
 			App.getMainWindow().getScene().addTextAnimation("Sticky Ball!");
 			break;
+			
+		case SPEED_UP:
+			App.getMainWindow().getScene().addTextAnimation("Speed Up!");
+			break;	
+			
+		case SLOW_DOWN:
+			App.getMainWindow().getScene().addTextAnimation("Slow Down!");
+			break;
+			
 		default:
 			throw new RuntimeException("Unsupported type: " + type);		
 		}

@@ -4,9 +4,9 @@ import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.geom.Rectangle;
 
 public class Ball extends GameObject {
-	private float x,y,radius = 10;
+	private float x,y,radius = Config.BALL_RADIUS;
 	private float velX = 0, velY = 0;
-	private float speed = 6.0f;
+	private float speed = Config.BALL_SPEED;
 	
 	private boolean destroyed = false; 
 	
@@ -14,17 +14,21 @@ public class Ball extends GameObject {
 		this.x = x;
 		this.y = y;
 		
-		this.velX = (float) Math.sin(-175) * speed;
-		this.velY = (float) Math.sin(-175) * speed;
+		this.velX = (float) Math.sin(-175.0f) * speed;
+		this.velY = (float) Math.cos(-175.0f) * speed;
 	}
 	
 	@Override
 	public void render() {
-		GL11.glBegin(GL11.GL_TRIANGLE_FAN);			
-			GL11.glColor3f(1.0f, 0.5f, 0.5f);			
+		GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+			if (EffectManager.getInstance().isEffectActive(EffectType.FIREBALL))
+				GL11.glColor4f(1.0f, 0.15f, 0.15f, 1.0f);
+			else
+				GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+			
 			GL11.glVertex2f(x, y);
 		  
-			int numSegments = 100;
+			int numSegments = 16;
 			float angle;
 		  
 			for (int i = 0; i <= numSegments; i++) {
@@ -37,13 +41,13 @@ public class Ball extends GameObject {
 
 	@Override
 	public void step() {
-		x += velX;
-		y += velY;
+		x += velX * Config.getInstance().getSpeedFactor();
+		y += velY * Config.getInstance().getSpeedFactor();
 	}
 
 	@Override
 	public Rectangle getBoundingBox() {
-		return new Rectangle(x, y, 15f, 15f);
+		return new Rectangle(x, y, radius * 2, radius * 2);
 	}
 	
 	public void setAngleOfReflection(float angle) {	

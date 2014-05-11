@@ -1,7 +1,6 @@
 package org.x3n0m0rph59.breakout;
 
 import org.x3n0m0rph59.breakout.SoundLayer.Sounds;
-
 import org.lwjgl.input.*;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
@@ -48,7 +47,7 @@ public class MainWindow {
 	
 	private void initOpenGL() {
 		try {
-			Display.setDisplayModeAndFullscreen(new DisplayMode(1024, 768));
+			Display.setDisplayModeAndFullscreen(new DisplayMode((int) Config.SCREEN_WIDTH, (int) Config.SCREEN_HEIGHT));
 			Display.create();
 			Display.setVSyncEnabled(true);
 			
@@ -64,8 +63,8 @@ public class MainWindow {
 			
 			GL11.glMatrixMode(GL11.GL_PROJECTION);
 			GL11.glLoadIdentity();
-			GL11.glViewport(0, 0, 1024, 768);
-			GL11.glOrtho(0, 1024, 768, 0, 0, 128);					
+			GL11.glViewport(0, 0, (int) Config.SCREEN_WIDTH, (int) Config.SCREEN_HEIGHT);
+			GL11.glOrtho(0, (int) Config.SCREEN_WIDTH, (int) Config.SCREEN_HEIGHT, 0, 0, 128);					
 			
 			GL11.glMatrixMode(GL11.GL_MODELVIEW);
 			GL11.glLoadIdentity();		

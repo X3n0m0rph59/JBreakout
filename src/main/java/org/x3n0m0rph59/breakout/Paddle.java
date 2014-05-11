@@ -5,7 +5,7 @@ import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.geom.Rectangle;
 
 public class Paddle extends GameObject {
-	protected float x, y, width = 75, height = 15;
+	protected float x, y, width = Config.PADDLE_DEFAULT_WIDTH, height = Config.PADDLE_HEIGHT;
 	
 	@Override
 	public void render() {
@@ -28,7 +28,7 @@ public class Paddle extends GameObject {
 	
 	public void setCenteredPosition(float x, float y) {
 		this.x = x - width / 2;		
-		this.y = 700;
+		this.y = Config.PADDLE_DEFAULT_Y;
 	}
 
 	@Override
@@ -37,11 +37,11 @@ public class Paddle extends GameObject {
 	}
 	
 	public void expand() {
-		this.width += 35f;
+		this.width += Config.PADDLE_EXPANSION;
 	}
 	
 	public void shrink() {
-		this.width -= 35f;
+		this.width -= Config.PADDLE_EXPANSION;
 	}
 
 	public float getX() {

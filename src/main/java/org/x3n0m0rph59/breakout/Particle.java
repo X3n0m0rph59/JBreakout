@@ -5,7 +5,7 @@ import org.newdawn.slick.geom.Rectangle;
 
 public class Particle extends GameObject {
 	private float x,y, speed;
-	private final float width = 2, height = 2;
+	private final float width = Config.PARTICLE_WIDTH, height = Config.PARTICLE_HEIGHT;
 	
 	public Particle(float x, float y, float speed) {
 		this.x = x;
@@ -17,7 +17,7 @@ public class Particle extends GameObject {
 	@Override
 	public void render() {
 		GL11.glBegin(GL11.GL_QUADS);
-			GL11.glColor3f(0.8f, 0.8f, 0.8f);
+			GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.7f);
 			GL11.glVertex2f(x, y);			
 			GL11.glVertex2f(x + width, y);			
 			GL11.glVertex2f(x + width, y + height);			

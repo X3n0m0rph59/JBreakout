@@ -5,7 +5,7 @@ import org.newdawn.slick.geom.Rectangle;
 
 public class Projectile extends GameObject {
 	private float x,y;
-	private final float width = 5.0f, height = 10.0f;
+	private final float width = Config.PROJECTILE_WIDTH, height = Config.PROJECTILE_HEIGHT;
 	
 	private boolean destroyed = false;
 	
@@ -27,7 +27,7 @@ public class Projectile extends GameObject {
 
 	@Override
 	public void step() {
-		y -= 10.0f;
+		y -= Config.PROJECTILE_SPEED;
 	}
 
 	@Override

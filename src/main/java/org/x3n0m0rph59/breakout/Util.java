@@ -5,7 +5,7 @@ import java.util.Random;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Point;
 
-enum Edge { LEFT, TOP_LEFT, TOP, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT }
+enum Edge {LEFT, TOP_LEFT, TOP, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT}
 
 public final class Util {
 	public static Edge getCollisionEdge(Rectangle r1, Rectangle r2) {

@@ -27,7 +27,7 @@ public class TextAnimation extends GameObject {
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		
 		int w = font.getWidth(text);		
-		font.drawString((1024 / 2) - (w / 2), 400, text, color);
+		font.drawString(((int) Config.SCREEN_WIDTH / 2) - (w / 2), (int) Config.SCREEN_HEIGHT / 2, text, color);
 			
 		GL11.glDisable(GL11.GL_BLEND);
 	}
@@ -38,7 +38,7 @@ public class TextAnimation extends GameObject {
 
 		color.a -= 0.015f;
 		
-		if (frameCounter > 60 * 3 || color.a <= 0.0f) {
+		if (frameCounter > 60 * Config.TOAST_DELAY || color.a <= 0.0f) {
 			setDestroyed(true);
 		}
 	}

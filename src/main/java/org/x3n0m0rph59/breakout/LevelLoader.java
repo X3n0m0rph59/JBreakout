@@ -14,7 +14,8 @@ public class LevelLoader {
 		FileReader file = null;
 		BufferedReader reader = null;
 		try {
-			file = new FileReader("./data/levels/level0" + level + ".lvl");
+			
+			file = new FileReader("./data/levels/level" + String.format("%02d", level) + ".lvl");
 			reader = new BufferedReader(file);
 			
 			int lindex = 0;
@@ -49,9 +50,14 @@ public class LevelLoader {
 					case 'P':
 						type = Brick.Type.POWERUP;
 						break;
-					}
+					}	
 					
-					bricks.add(new Brick(type, (i * 40) + 40, (lindex * 30) + 40, 35f, 20f));
+					final float BRICK_WIDTH = ((Config.SCREEN_WIDTH - Config.BRICK_OFFSET_X) / line.length()) - Config.BRICK_SPACING_X;
+					final float BRICK_HEIGHT = Config.BRICK_HEIGHT;
+					
+					bricks.add(new Brick(type, (i * (BRICK_WIDTH + Config.BRICK_SPACING_X)) + Config.BRICK_OFFSET_X, 
+											   (lindex * (BRICK_HEIGHT  + Config.BRICK_SPACING_Y)) + Config.BRICK_OFFSET_Y, 
+											   BRICK_WIDTH, BRICK_HEIGHT));
 				}
 				
 				lindex++;

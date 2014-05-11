@@ -4,9 +4,9 @@ import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.geom.Rectangle;
 
 public class Powerup extends GameObject {
-	private float x,y, width = 20f, height = 20f;
+	private float x,y, width = Config.POWERUP_WIDTH, height = Config.POWERUP_HEIGHT;
 	private EffectType type;
-	private boolean destroyed = false;
+	private boolean destroyed = false;		
 
 	public Powerup(float x, float y, EffectType type) {
 		this.x = x;
@@ -40,6 +40,12 @@ public class Powerup extends GameObject {
 				break;
 			case STICKY_BALL:
 				GL11.glColor3f(0.0f, 0.0f, 1.0f);
+				break;
+			case SPEED_UP:
+				GL11.glColor3f(0.0f, 1.0f, 1.0f);
+				break;			
+			case SLOW_DOWN:
+				GL11.glColor3f(0.0f, 1.0f, 0.5f);
 				break;
 				
 			default:
