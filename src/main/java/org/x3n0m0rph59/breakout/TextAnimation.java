@@ -18,7 +18,7 @@ public class TextAnimation extends GameObject {
 	
 	public TextAnimation(String text) {
 		this.text = text;
-		font = FontLoader.getInstance().getFont("Arial", Font.BOLD, 44);
+		font = FontLoader.getInstance().getFont("Verdana", Font.BOLD, 44);
 	}
 	
 	@Override
@@ -27,7 +27,7 @@ public class TextAnimation extends GameObject {
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		
 		int w = font.getWidth(text);		
-		font.drawString((1024 / 2) - (w / 2), 300, text, color);
+		font.drawString((1024 / 2) - (w / 2), 400, text, color);
 			
 		GL11.glDisable(GL11.GL_BLEND);
 	}

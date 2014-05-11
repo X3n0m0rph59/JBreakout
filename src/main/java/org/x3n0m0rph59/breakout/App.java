@@ -8,7 +8,7 @@ public class App
     public static void main( String[] args )
     {
     	mainWindow = new MainWindow();    	
-    	mainWindow.show();
+    	mainWindow.show();	
     }
 
 	public static MainWindow getMainWindow() {

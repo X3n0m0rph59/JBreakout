@@ -37,11 +37,11 @@ public class Paddle extends GameObject {
 	}
 	
 	public void expand() {
-		this.width += 25f;
+		this.width += 35f;
 	}
 	
 	public void shrink() {
-		this.width -= 25f;
+		this.width -= 35f;
 	}
 
 	public float getX() {

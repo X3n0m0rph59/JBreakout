@@ -5,8 +5,8 @@ import org.newdawn.slick.geom.Rectangle;
 import org.x3n0m0rph59.breakout.SoundLayer.Sounds;
 
 public class Brick extends GameObject {	
-	public enum Type {NORMAL, WEAK, HARD, SOLID, POWERUP};
-	public enum Action {REFLECT, PASS};
+	public enum Type { NORMAL, WEAK, HARD, SOLID, POWERUP };
+	public enum Action { REFLECT, PASS };
 	
 	private float x, y, width, height;
 	private boolean destroyed = false;
@@ -28,7 +28,7 @@ public class Brick extends GameObject {
 		switch (type) {		
 		case NORMAL:
 			GL11.glBegin(GL11.GL_QUADS);
-				GL11.glColor3f(0.0f, 1.0f, 0.0f);			
+				GL11.glColor3f(0.0f, 1.0f, 0.0f);
 				GL11.glVertex2f(x, y);
 				GL11.glColor3f(0.0f, 1.0f, 0.0f);
 				GL11.glVertex2f(x + width, y);

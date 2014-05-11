@@ -12,9 +12,10 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.TrueTypeFont;
+import org.newdawn.slick.geom.Rectangle;
 
 public final class Scene {
-	enum State {GREETING, WAITING_FOR_BALL, RUNNING, LEVEL_COMPLETE, RESTART, PAUSED, TERMINATED};
+	enum State { GREETING, WAITING_FOR_BALL, RUNNING, STAGE_CLEARED, RESTART, PAUSED, TERMINATED };
 	private State state = State.GREETING;
 	
 	private ScoreBoard scoreBoard = new ScoreBoard();	
@@ -36,7 +37,7 @@ public final class Scene {
 	private int frameCounter = 0;
 	
 	public Scene() {
-		font = FontLoader.getInstance().getFont("Arial", Font.BOLD, 44);
+		font = FontLoader.getInstance().getFont("Verdana", Font.BOLD, 44);
 		
 		initLevel(0);						
 	}
@@ -118,7 +119,7 @@ public final class Scene {
 			GL11.glEnd();
 									
 			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			font.drawString(240, 300, "Press mouse button to start", Color.white);
+			font.drawString(190, 400, "Press mouse button to start", Color.white);
 			
 			GL11.glDisable(GL11.GL_BLEND);
 			break;
@@ -142,7 +143,7 @@ public final class Scene {
 			GL11.glEnd();
 									
 			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			font.drawString(200, 300, "Press mouse button to resume", Color.white);
+			font.drawString(180, 400, "Press mouse button to resume", Color.white);
 			GL11.glDisable(GL11.GL_BLEND);
 			break;
 			
@@ -159,11 +160,11 @@ public final class Scene {
 			GL11.glEnd();
 									
 			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			font.drawString(180, 300, "Press mouse button for a new ball", Color.white);
+			font.drawString(100, 400, "Press mouse button for a new ball", Color.white);
 			GL11.glDisable(GL11.GL_BLEND);
 			break;
 			
-		case LEVEL_COMPLETE:
+		case STAGE_CLEARED:
 			GL11.glEnable(GL11.GL_BLEND);
 			GL11.glBlendFunc(GL11.GL_ONE_MINUS_SRC_COLOR, GL11.GL_ONE_MINUS_DST_COLOR);
 			
@@ -176,8 +177,8 @@ public final class Scene {
 			GL11.glEnd();
 									
 			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-			font.drawString(350, 300, "Stage " + (level + 1) + " finished!", Color.white);
-			font.drawString(200, 400, "Press Mouse Button to continue", Color.white);
+			font.drawString(350, 300, "Stage " + (level + 1) + " cleared!", Color.white);
+			font.drawString(180, 400, "Press Mouse Button to continue", Color.white);
 			GL11.glDisable(GL11.GL_BLEND);
 			break;
 						
@@ -186,7 +187,40 @@ public final class Scene {
 			
 		default:
 			throw new RuntimeException("Unsupported state: " + state);			
-		}		
+		}
+		
+		// Debugging:
+		// Draw bounding boxes around the paddle 
+//		Rectangle r1 = balls.get(0).getBoundingBox();
+//		Rectangle r2 = paddle.getBoundingBox();		
+//
+//		Rectangle left 			= new Rectangle(r2.getX() - r1.getWidth(), r2.getY(), r1.getWidth(), r2.getHeight());
+//		Rectangle top_left 		= new Rectangle(r2.getX() - r1.getWidth(), r2.getY() - r1.getHeight(), r1.getWidth(), r1.getHeight());
+//		Rectangle top 			= new Rectangle(r2.getX(), r2.getY() - r1.getHeight(), r2.getWidth(), r1.getHeight());
+//		Rectangle top_right 	= new Rectangle(r2.getX() + r2.getWidth(), r2.getY() - r1.getHeight(), r1.getWidth(), r1.getHeight());
+//		Rectangle right 		= new Rectangle(r2.getX() + r2.getWidth(), r2.getY(), r1.getWidth(), r2.getHeight());
+//		Rectangle bottom_right 	= new Rectangle(r2.getX() + r2.getWidth(), r2.getY() + r2.getHeight(), r1.getWidth(), r1.getHeight());
+//		Rectangle bottom 		= new Rectangle(r2.getX(), r2.getY() + r2.getHeight(), r2.getWidth(), r1.getHeight());
+//		Rectangle bottom_left 	= new Rectangle(r2.getX() - r1.getWidth(), r2.getY() + r2.getHeight(), r1.getWidth(), r1.getHeight());
+//		
+//		drawRect(left);
+//		drawRect(top_left);
+//		drawRect(top);
+//		drawRect(top_right);
+//		drawRect(right);
+//		drawRect(bottom_right);
+//		drawRect(bottom);
+//		drawRect(bottom_left);
+	}
+	
+	public void drawRect(Rectangle r) {
+		GL11.glBegin(GL11.GL_QUADS);
+			GL11.glColor4f(1.0f, 0.0f, 0.0f, 0.8f);
+			GL11.glVertex2f(r.getX(), r.getY());			
+			GL11.glVertex2f(r.getX() + r.getWidth(), r.getY());			
+			GL11.glVertex2f(r.getX() + r.getWidth(), r.getY() + r.getHeight());			
+			GL11.glVertex2f(r.getX(), r.getY() + r.getHeight());
+		GL11.glEnd();
 	}
 	
 	public void step() {
@@ -215,7 +249,7 @@ public final class Scene {
 			}
 			break;
 			
-		case LEVEL_COMPLETE:
+		case STAGE_CLEARED:
 			if (Mouse.isButtonDown(0) || Mouse.isButtonDown(1)) {
 				initLevel(++level);
 				setState(State.RUNNING);
@@ -287,8 +321,8 @@ public final class Scene {
 			}
 			
 			// Stage cleared?			
-			if (bricks.isEmpty()) {
-				setState(State.LEVEL_COMPLETE);
+			if (isStageCleared()) {
+				setState(State.STAGE_CLEARED);
 			}
 			break;
 			
@@ -323,6 +357,23 @@ public final class Scene {
 		}
 	}
 		
+	public boolean isStageCleared() {
+		return getDestructibleBricksLeft() == 0;
+	}
+
+	public int getDestructibleBricksLeft() {
+		if (bricks.isEmpty())
+			return 0;
+		
+		int destructibleBricks = 0;
+		
+		for (Brick b : bricks)
+			if (b.getType() != Brick.Type.SOLID)
+				destructibleBricks++;
+		
+		return destructibleBricks;
+	}
+
 	public void doCollisionDetection() {
 		// Ball vs. Edges
 		for (Ball ball : balls) {
@@ -336,7 +387,7 @@ public final class Scene {
 		for (Ball ball : balls) {
 			if (ball.getBoundingBox().getY() <= 0 || 
 				(EffectManager.getInstance().isEffectActive(EffectType.CLOSED_BOTTOM)) && 
-				 ball.getBoundingBox().getY() >= 768) {
+				 ball.getBoundingBox().getY() >= 768 - 25) {
 				ball.invertYVelocity();
 				
 				SoundLayer.playSound(Sounds.WALL_HIT);
@@ -356,7 +407,46 @@ public final class Scene {
 		// Ball vs. Paddle
 		for (Ball ball : balls) {
 			if (Util.collisionTest(paddle.getBoundingBox(), ball.getBoundingBox())) {
-				ball.invertYVelocity();
+				switch (Util.getCollisionEdge(ball.getBoundingBox(), paddle.getBoundingBox())) {
+				case LEFT:
+					ball.setAngleOfReflection(180);
+					break;
+					
+				case TOP_LEFT:
+					ball.setAngleOfReflection(320);
+					break;
+					
+				case TOP:
+					// TODO: calculate fractional angle of reflection 
+					//		 based on paddle surface impact point to 
+					//		 simulate a curved surface
+					float angle = 180 * Util.sign(ball.getVelX()) * -1;
+					ball.setAngleOfReflection(angle);
+					break;
+					
+				case TOP_RIGHT:
+					ball.setAngleOfReflection(45);
+					break;
+					
+				case RIGHT:
+					ball.setAngleOfReflection(180);
+					break;									
+					
+				case BOTTOM_RIGHT:
+					ball.setAngleOfReflection(225);
+					break;
+					
+				case BOTTOM:
+					ball.setAngleOfReflection(180);
+					break;
+					
+				case BOTTOM_LEFT:
+					ball.setAngleOfReflection(135);
+					break;
+
+				default:
+					throw new RuntimeException("Invalid egde type");				
+				}				
 				
 				SoundLayer.playSound(Sounds.PADDLE_HIT);
 			}
@@ -409,8 +499,46 @@ public final class Scene {
 			if (!EffectManager.getInstance().isEffectActive(EffectType.FIREBALL) &&
 				b.getType() != Brick.Type.WEAK) {
 				
-				ball.invertXVelocity();
-				ball.invertYVelocity();
+				switch (Util.getCollisionEdge(ball.getBoundingBox(), b.getBoundingBox())) {
+				case LEFT:
+					ball.invertXVelocity();					
+					break;
+					
+				case TOP_LEFT:
+					ball.invertXVelocity();
+					ball.invertYVelocity();
+					break;
+					
+				case TOP:
+					ball.invertYVelocity();
+					break;
+					
+				case TOP_RIGHT:
+					ball.invertXVelocity();
+					ball.invertYVelocity();
+					break;
+					
+				case RIGHT:
+					ball.invertXVelocity();
+					break;									
+					
+				case BOTTOM_RIGHT:
+					ball.invertXVelocity();
+					ball.invertYVelocity();
+					break;
+					
+				case BOTTOM:
+					ball.invertYVelocity();
+					break;
+					
+				case BOTTOM_LEFT:
+					ball.invertXVelocity();
+					ball.invertYVelocity();
+					break;
+
+				default:
+					throw new RuntimeException("Invalid egde type");				
+				}				
 			}			
 			
 			if (b.getType() != Brick.Type.SOLID) {

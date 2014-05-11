@@ -8,7 +8,6 @@ public class Projectile extends GameObject {
 	private final float width = 5.0f, height = 10.0f;
 	
 	private boolean destroyed = false;
-	private int frameCounter = 0;
 	
 	public Projectile(float x, float y) {
 		this.x = x;
@@ -28,8 +27,6 @@ public class Projectile extends GameObject {
 
 	@Override
 	public void step() {
-		frameCounter++;
-		
 		y -= 10.0f;
 	}
 

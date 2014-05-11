@@ -5,13 +5,17 @@ import org.newdawn.slick.geom.Rectangle;
 
 public class Ball extends GameObject {
 	private float x,y,radius = 10;
-	private float velX = 1.5f, velY = 5.5f;
+	private float velX = 0, velY = 0;
+	private float speed = 6.0f;
 	
 	private boolean destroyed = false; 
 	
 	public Ball(float x, float y) {
 		this.x = x;
 		this.y = y;
+		
+		this.velX = (float) Math.sin(-175) * speed;
+		this.velY = (float) Math.sin(-175) * speed;
 	}
 	
 	@Override
@@ -39,7 +43,12 @@ public class Ball extends GameObject {
 
 	@Override
 	public Rectangle getBoundingBox() {
-		return new Rectangle(x, y, 10f, 10f);
+		return new Rectangle(x, y, 15f, 15f);
+	}
+	
+	public void setAngleOfReflection(float angle) {	
+		velX = (float) Math.sin(angle) * speed;
+		velY = (float) Math.cos(angle) * speed;
 	}
 	
 	public void invertXVelocity() {
@@ -61,5 +70,13 @@ public class Ball extends GameObject {
 	
 	public void setDestroyed(boolean b) {
 		destroyed = b;
+	}
+
+	public float getVelX() {
+		return velX;
+	}
+	
+	public float getVelY() {
+		return velY;
 	}
 }
