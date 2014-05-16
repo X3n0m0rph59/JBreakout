@@ -1,6 +1,6 @@
 package org.x3n0m0rph59.breakout;
 
-import org.x3n0m0rph59.breakout.SoundLayer.Sounds;
+import org.x3n0m0rph59.breakout.SoundLayer;
 
 import java.awt.Font;
 import java.util.ArrayList;
@@ -12,11 +12,11 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.TrueTypeFont;
-import org.newdawn.slick.geom.Rectangle;
+
 
 public final class Scene {
-	enum State {GREETING, WAITING_FOR_BALL, RUNNING, STAGE_CLEARED, RESTART, PAUSED, TERMINATED};
-	private State state = State.GREETING;
+	public enum State {LOADING, GREETING, WAITING_FOR_BALL, RUNNING, STAGE_CLEARED, RESTART, PAUSED, GAME_OVER, TERMINATED};
+	private State state = State.LOADING;
 	
 	private ScoreBoard scoreBoard = new ScoreBoard();	
 	
@@ -42,45 +42,56 @@ public final class Scene {
 		initLevel(0);						
 	}
 	
-	private void initLevel(int level) {	
-		powerups.clear();
-		projectiles.clear();
-		
+	private void initLevel(int level) {		
 		EffectManager.getInstance().clearEffects();
+		
+		balls.clear();
+		balls.add(new Ball(Config.BALL_SPAWN_X, Config.BALL_SPAWN_Y));
 		
 		bricks = LevelLoader.loadLevel(level);
 		
-		balls.clear();
-		balls.add(new Ball(Config.BALL_SPAWN_X, Config.BALL_SPAWN_Y));		
+		powerups.clear();
+		projectiles.clear();
+		textAnimations.clear();
+				
+		// Spawn initial set of particles
+		particles.clear();
+		for (int i = 0; i < Config.SYNC_FPS * Config.PARTICLE_DENSITY ; i++) {
+			particles.add(new Particle(Util.random(0, (int) Config.CLIENT_WIDTH), 
+									   Util.random(0, (int) Config.SCREEN_HEIGHT), 
+									   Util.random((int) Config.PARTICLE_MIN_SPEED, 
+											   	   (int) Config.PARTICLE_MAX_SPEED)));
+		}
 	}
 	
 	private void drawCenteredText(String[] lines, boolean eraseBackground) {
-		GL11.glEnable(GL11.GL_BLEND);
-		
 		if (eraseBackground)
-		{
+		{			
 			GL11.glBlendFunc(GL11.GL_ONE_MINUS_SRC_COLOR, GL11.GL_ONE_MINUS_DST_COLOR);
+			GL11.glEnable(GL11.GL_BLEND);
 			
 			GL11.glBegin(GL11.GL_QUADS);
 				GL11.glColor4f(0.0f, 0.0f, 0.0f, 0.25f);
 				GL11.glVertex2f(0, 0);			
-				GL11.glVertex2f(Config.SCREEN_WIDTH, 0);			
-				GL11.glVertex2f(Config.SCREEN_WIDTH, Config.SCREEN_HEIGHT);			
+				GL11.glVertex2f(Config.CLIENT_WIDTH, 0);			
+				GL11.glVertex2f(Config.CLIENT_WIDTH, Config.SCREEN_HEIGHT);			
 				GL11.glVertex2f(0, Config.SCREEN_HEIGHT);
 			GL11.glEnd();
 		}
 								
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		GL11.glEnable(GL11.GL_BLEND);
 		
 		int cnt = 0;
 		for (String line : lines) {
 			int width = font.getWidth(line);
 			int height = font.getLineHeight() + 5;
 			
-			font.drawString(Config.SCREEN_WIDTH / 2 - width / 2, (height * cnt) + Config.SCREEN_HEIGHT / 2, line, Color.white);
+			font.drawString(Config.CLIENT_WIDTH / 2 - width / 2, 
+							(height * cnt) + Config.SCREEN_HEIGHT / 2, 
+							line, Color.white);
 			cnt++;
 		}
-		
 		
 		GL11.glDisable(GL11.GL_BLEND);
 	}
@@ -110,19 +121,26 @@ public final class Scene {
 		}
 		
 		// Draw a wall on the bottom of the screen?
-		if (EffectManager.getInstance().isEffectActive(EffectType.CLOSED_BOTTOM)) {
+		if (EffectManager.getInstance().isEffectActive(EffectType.BOTTOM_WALL)) {
 			drawBottomWall();
 		}
 		
 		paddle.render();
 		
 		scoreBoard.render();
-		
-		for (TextAnimation a : textAnimations) {
-			a.render();
-		}
 				
+//		for (TextAnimation a : textAnimations) {
+//			a.render();
+//		}
+		
+		if (textAnimations.size() > 0)
+			textAnimations.get(0).render();
+		
 		switch (state) {
+		case LOADING:
+			drawCenteredText(new String[] {"Loading, please wait..."}, true);
+			break;
+			
 		case GREETING:
 			drawCenteredText(new String[] {"Press mouse button to start"}, true);
 			break;
@@ -144,6 +162,10 @@ public final class Scene {
 			
 		case STAGE_CLEARED:
 			drawCenteredText(new String[] {"Stage " + (level + 1) + " cleared", "Press mouse button to continue"}, true);
+			break;
+			
+		case GAME_OVER:
+			drawCenteredText(new String[] {"GAME OVER!", "Press F2 to restart or Q to quit"}, true);
 			break;
 						
 		case TERMINATED:
@@ -179,7 +201,7 @@ public final class Scene {
 	}
 
 	private void drawBottomWall() {
-		for (int i = 0; i <= Config.SCREEN_WIDTH / Config.BOTTOM_WALL_SEGMENT_WIDTH; i++) {
+		for (int i = 0; i <= Config.CLIENT_WIDTH / (Config.BOTTOM_WALL_SEGMENT_WIDTH + Config.BOTTOM_WALL_SEGMENT_SPACING); i++) {
 			float x = i * (Config.BOTTOM_WALL_SEGMENT_WIDTH + Config.BOTTOM_WALL_SEGMENT_SPACING);
 			float y = Config.SCREEN_HEIGHT - Config.BOTTOM_WALL_HEIGHT;
 			
@@ -207,11 +229,17 @@ public final class Scene {
 //	}
 	
 	public void step() {
-		frameCounter++;
+		frameCounter++;		
 		
+		float mdx = (int) Mouse.getDX();
+		// float mdy = (int) Mouse.getDY();
+				
 		processKeyboardEvents();
 		
 		switch (state) {
+		case LOADING:
+			break;
+			
 		case GREETING:
 			if (Mouse.isButtonDown(0) || Mouse.isButtonDown(1)) {
 				setState(State.RUNNING);
@@ -273,10 +301,14 @@ public final class Scene {
 			for (Projectile p : projectiles) {
 				p.step();
 			}
+
+//			for (TextAnimation a : textAnimations) {
+//				a.step();
+//			}
 			
-			for (TextAnimation a : textAnimations) {
-				a.step();
-			}
+			if (textAnimations.size() > 0)
+				textAnimations.get(0).step();
+			
 			
 			for (Ball b : balls) {
 				b.step();
@@ -288,8 +320,8 @@ public final class Scene {
 			doCleanup();
 			
 			// Spawn new particles
-			for (int i = 0; i < 2; i++) {
-				particles.add(new Particle(Util.random(0, (int) Config.SCREEN_WIDTH), 0f, 
+			for (int i = 0; i < Config.PARTICLE_DENSITY; i++) {
+				particles.add(new Particle(Util.random(0, (int) Config.CLIENT_WIDTH), 0f, 
 													   Util.random((int) Config.PARTICLE_MIN_SPEED, 
 															       (int) Config.PARTICLE_MAX_SPEED)));
 			}
@@ -300,7 +332,26 @@ public final class Scene {
 					for (int i = 0; i < 2; i++) {
 						float x = (frameCounter % (Config.PROJECTILE_FIRE_RATE * 2) == 0) ? 
 								paddle.getX() : paddle.getX() + paddle.getWidth() - Config.PROJECTILE_WIDTH; 
+						
 						projectiles.add(new Projectile(x, paddle.getY()));
+						
+						SoundLayer.playSound(Sounds.BULLET_FIRED);
+					}
+				}
+			}
+			
+			// Move sticky balls with the paddle and
+			// release them if a mouse button is pushed
+			for (Ball ball : balls)
+			{
+				if (ball.getState() == Ball.State.STUCK_TO_PADDLE) {
+					if ((Mouse.getX() + mdx >= 0) && (Mouse.getX() + mdx <= Config.CLIENT_WIDTH)) {						
+						ball.moveBy(mdx, 0);
+					}
+					
+					if (Mouse.isButtonDown(0) || Mouse.isButtonDown(1)) {
+						// ball.setAngleOfReflection(180);
+						ball.setState(Ball.State.ROLLING);						
 					}
 				}
 			}
@@ -323,11 +374,21 @@ public final class Scene {
 		case WAITING_FOR_BALL:
 			if (Mouse.isButtonDown(0) || Mouse.isButtonDown(1)) {
 				balls.clear();
-				spawnBall();
+				spawnBall(false);
 				
 				setState(State.RUNNING);
 			}
 			
+			if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
+				setState(State.TERMINATED);
+			}
+			
+			if (Keyboard.isKeyDown(Keyboard.KEY_F2)) {
+				setState(State.RESTART);
+			}
+			break;
+			
+		case GAME_OVER:
 			if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
 				setState(State.TERMINATED);
 			}
@@ -359,23 +420,49 @@ public final class Scene {
 		return destructibleBricks;
 	}
 
-	public void doCollisionDetection() {
+	public void doCollisionDetection() {		
+		float pdx = paddle.getdX();		
+		
 		// Ball vs. Edges
-		for (Ball ball : balls) {
-			if (ball.getBoundingBox().getX() <= 0 || ball.getBoundingBox().getX() >= Config.SCREEN_WIDTH) {
-				ball.invertXVelocity();
+		for (Ball ball : balls) {			
+			// sanity check ball coordinates
+			if ((ball.getBoundingBox().getX() + ball.getBoundingBox().getWidth()) >= Config.CLIENT_WIDTH) {
+				final float newX = Config.CLIENT_WIDTH - ball.getBoundingBox().getWidth();				
+				final float newY = ball.getBoundingBox().getY(); 
 				
-				SoundLayer.playSound(Sounds.WALL_HIT);
+				ball.setPosition(newX, newY);
+			}
+			
+			if (ball.getBoundingBox().getX() <= 0) {
+				final float newX = 0;				
+				final float newY = ball.getBoundingBox().getY(); 
+				
+				ball.setPosition(newX, newY);
+			}	
+			
+			// Reflect the ball if it's not stuck to the paddle	
+			if (ball.getState() != Ball.State.STUCK_TO_PADDLE) {
+				if (ball.getBoundingBox().getX() <= 0 || 
+					ball.getBoundingBox().getX() >= Config.CLIENT_WIDTH - 
+													ball.getBoundingBox().getWidth()) {
+					
+					ball.invertXVelocity();
+					
+					SoundLayer.playSound(Sounds.WALL_HIT);
+				}
 			}
 		}
 
 		for (Ball ball : balls) {
-			if (ball.getBoundingBox().getY() <= 0 || 
-				(EffectManager.getInstance().isEffectActive(EffectType.CLOSED_BOTTOM)) && 
-				 ball.getBoundingBox().getY() >= Config.SCREEN_HEIGHT - Config.BOTTOM_WALL_HEIGHT) {
-				ball.invertYVelocity();
-				
-				SoundLayer.playSound(Sounds.WALL_HIT);
+			if (ball.getState() != Ball.State.STUCK_TO_PADDLE) {
+				if (ball.getBoundingBox().getY() <= 0 || 
+					(EffectManager.getInstance().isEffectActive(EffectType.BOTTOM_WALL)) && 
+					 ball.getBoundingBox().getY() >= (Config.SCREEN_HEIGHT - Config.BOTTOM_WALL_HEIGHT) - 
+					 								  ball.getBoundingBox().getHeight()) {
+					ball.invertYVelocity();
+					
+					SoundLayer.playSound(Sounds.WALL_HIT);
+				}
 			}
 		}
 		
@@ -384,56 +471,96 @@ public final class Scene {
 		while (bi.hasNext()) {			
 			Ball ball = bi.next();
 			if (ball.getBoundingBox().getY() >= Config.SCREEN_HEIGHT && 
-				!EffectManager.getInstance().isEffectActive(EffectType.CLOSED_BOTTOM)) {
-				ballLost(bi);
+				!EffectManager.getInstance().isEffectActive(EffectType.BOTTOM_WALL)) {
+				ballLost(ball, bi);
 			}
 		}
 		
 		// Ball vs. Paddle
 		for (Ball ball : balls) {
-			if (Util.collisionTest(paddle.getBoundingBox(), ball.getBoundingBox())) {
-				switch (Util.getCollisionEdge(ball.getBoundingBox(), paddle.getBoundingBox())) {
-				case LEFT:
-					ball.setAngleOfReflection(180);
-					break;
+			if (ball.getState() != Ball.State.STUCK_TO_PADDLE) {
+				if (Util.collisionTest(paddle.getBoundingBox(), ball.getBoundingBox())) {
+					float angle; 
 					
-				case TOP_LEFT:
-					ball.setAngleOfReflection(320);
-					break;
+					switch (Util.getCollisionEdge(ball.getBoundingBox(), paddle.getBoundingBox())) {
+					case LEFT:
+						angle = ball.getAngle() * -1;
+						ball.setAngleOfReflection(angle);
+						break;
+						
+					case TOP_LEFT:
+						angle = ball.getAngle() * -1;
+						ball.setAngleOfReflection(angle);
+						break;
+						
+					case TOP:
+						// TODO: calculate fractional angle of reflection 
+						// 		 based on paddle surface impact point to 
+						// 		 simulate a curved surface
+						final float ballX = ball.getBoundingBox().getCenterX();												
+						final float paddleCenter = paddle.getBoundingBox().getCenterX();						
+						final float deviationFromCenter = ballX - paddleCenter;						
+						final float fractionalAngle = deviationFromCenter * 0.25f;
+									
+						angle = ball.getAngle() + (360 - Math.abs(ball.getAngle()));						
+						
+						Logger.log("Deviation from center: " + deviationFromCenter +
+								   " Fractional angle: " + fractionalAngle + 
+								   " angle: " + ball.getAngle() +  
+								   " final angle: " + angle);
+						
+						ball.setAngleOfReflection(angle);												
+						break;
+						
+					case TOP_RIGHT:
+						angle = ball.getAngle() * -1;
+						ball.setAngleOfReflection(angle);
+						break;
+						
+					case RIGHT:
+						angle = ball.getAngle() * -1;
+						ball.setAngleOfReflection(angle);
+						break;									
+						
+					case BOTTOM_RIGHT:
+						angle = ball.getAngle() * -1;
+						ball.setAngleOfReflection(angle);
+						break;
+						
+					case BOTTOM:
+						angle = ball.getAngle() * -1;
+						ball.setAngleOfReflection(angle);
+						break;
+						
+					case BOTTOM_LEFT:
+						angle = ball.getAngle() * -1;
+						ball.setAngleOfReflection(angle);
+						break;
+	
+					default:
+						throw new RuntimeException("Invalid egde type");				
+					}
 					
-				case TOP:
-					// TODO: calculate fractional angle of reflection 
-					//		 based on paddle surface impact point to 
-					//		 simulate a curved surface
-					float angle = 180 * Util.sign(ball.getVelX()) * -1;
-					ball.setAngleOfReflection(angle);
-					break;
 					
-				case TOP_RIGHT:
-					ball.setAngleOfReflection(45);
-					break;
+					// Compute ball speed change due to paddle velocity
+					// Parameters for linear conversion:
+					final float minBallSpeedDelta = 1.0f; 
+					final float maxBallSpeedDelta = 1.5f;
 					
-				case RIGHT:
-					ball.setAngleOfReflection(180);
-					break;									
+					final float minPaddleDeltaX =  0.0f;
+					final float maxPaddleDeltaX = 10.0f;
 					
-				case BOTTOM_RIGHT:
-					ball.setAngleOfReflection(225);
-					break;
+					float velD = ((Math.abs(pdx) - minPaddleDeltaX) * (maxBallSpeedDelta - minBallSpeedDelta) / 
+									(maxPaddleDeltaX - minPaddleDeltaX)) + minBallSpeedDelta;
+					ball.changeSpeed(velD);
 					
-				case BOTTOM:
-					ball.setAngleOfReflection(180);
-					break;
 					
-				case BOTTOM_LEFT:
-					ball.setAngleOfReflection(135);
-					break;
-
-				default:
-					throw new RuntimeException("Invalid egde type");				
-				}				
-				
-				SoundLayer.playSound(Sounds.PADDLE_HIT);
+					// Sticky ball?
+					if (EffectManager.getInstance().isEffectActive(EffectType.STICKY_BALL))
+						ball.setState(Ball.State.STUCK_TO_PADDLE);
+					
+					SoundLayer.playSound(Sounds.PADDLE_HIT);
+				}
 			}
 		}
 		
@@ -470,7 +597,7 @@ public final class Scene {
 		
 		if (hitByProjectile) {
 			if (b.getType() != Brick.Type.SOLID) {
-				score += 100;		
+				score += 100;
 			}
 			
 			if (b.getType() == Brick.Type.POWERUP) {
@@ -538,13 +665,15 @@ public final class Scene {
 		}
 	}
 
-	public void spawnBall() {
-		balls.add(new Ball(Config.BALL_SPAWN_X, Config.BALL_SPAWN_Y));
+	public void spawnBall(boolean isMultiball) {
+		balls.add(new Ball(Config.BALL_SPAWN_X, Config.BALL_SPAWN_Y, isMultiball));
 	}
 	
-	private void ballLost(Iterator<Ball> bi) {
-		ballsLeft--;
-		score -= 1000;
+	private void ballLost(Ball ball, Iterator<Ball> bi) {
+		if (!ball.isMultiball()) {
+			ballsLeft--;
+			score -= 1000;
+		}
 		
 		bi.remove();
 
@@ -554,6 +683,10 @@ public final class Scene {
 		}			
 		
 		SoundLayer.playSound(Sounds.BALL_LOST);
+		
+		if (ballsLeft <= 0) {
+			setState(State.GAME_OVER);
+		}
 	}
 	
 	public void doCleanup() {		
@@ -654,6 +787,10 @@ public final class Scene {
 	public void setScore(int score) {
 		this.score = score;
 	}
+	
+	public int getLevel() {		
+		return level;
+	}
 
 	public Paddle getPaddle() {
 		return paddle;		
@@ -665,5 +802,41 @@ public final class Scene {
 
 	public void setState(State state) {
 		this.state = state;
+		
+		switch (state) {					
+		case GREETING:
+			SoundLayer.playMusic(Musics.BACKGROUND);
+			break;
+			
+		case RESTART:
+			level = 0;
+			score = 0;
+			ballsLeft = Config.INITIAL_BALLS_LEFT;			
+			break;
+			
+		case GAME_OVER:
+			break;
+			
+		case LOADING:
+			break;
+			
+		case PAUSED:
+			break;
+			
+		case RUNNING:
+			break;
+			
+		case STAGE_CLEARED:
+			break;
+			
+		case TERMINATED:
+			break;
+			
+		case WAITING_FOR_BALL:
+			break;
+			
+		default:
+			throw new RuntimeException("Invalid state: " + state);
+		}
 	}
 }

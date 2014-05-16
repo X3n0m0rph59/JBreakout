@@ -17,18 +17,33 @@ public class LevelLoader {
 			
 			file = new FileReader("./data/levels/level" + String.format("%02d", level) + ".lvl");
 			reader = new BufferedReader(file);
-			
+
 			int lindex = 0;
 			String line;
-			while ((line = reader.readLine()) != null) {				
+			while ((line = reader.readLine()) != null) {
+				Brick.Type type = null;
+				Brick.Behaviour behaviour = Brick.Behaviour.NORMAL;
+				int multiplier = 1;
+				
 				for (int i = 0; i < line.length() - 1; i++) {
 					char c = line.charAt(i);
-					
-					Brick.Type type = null;
-					
+
 					switch (c) {
-					case ' ':
-						// Whitespace means "no brick at that position"
+					// Behavioural modifiers apply linewise
+					case '<':
+						behaviour = Brick.Behaviour.MOVE_LEFT;
+						multiplier *= Config.BRICK_MOVEMENT_MULTIPLIER;
+						continue;
+						
+					case '>':
+						behaviour = Brick.Behaviour.MOVE_RIGHT;
+						multiplier *= Config.BRICK_MOVEMENT_MULTIPLIER;
+						continue;
+					
+					// Brick types
+					case ' ':												
+					case 'X':
+						// Whitespace and 'X' means "no brick at that position"
 						continue;
 						
 					case 'N':
@@ -52,12 +67,15 @@ public class LevelLoader {
 						break;
 					}	
 					
-					final float BRICK_WIDTH = ((Config.SCREEN_WIDTH - Config.BRICK_OFFSET_X) / line.length()) - Config.BRICK_SPACING_X;
+					final float BRICK_WIDTH = ((Config.CLIENT_WIDTH - Config.BRICK_OFFSET_X) / line.length()) - Config.BRICK_SPACING_X;
 					final float BRICK_HEIGHT = Config.BRICK_HEIGHT;
 					
-					bricks.add(new Brick(type, (i * (BRICK_WIDTH + Config.BRICK_SPACING_X)) + Config.BRICK_OFFSET_X, 
-											   (lindex * (BRICK_HEIGHT  + Config.BRICK_SPACING_Y)) + Config.BRICK_OFFSET_Y, 
-											   BRICK_WIDTH, BRICK_HEIGHT));
+					final float BRICK_SPEED = Config.BRICK_MOVEMENT_SPEED * multiplier;
+					
+					bricks.add(new Brick(type, behaviour, BRICK_SPEED, 
+										 (i * (BRICK_WIDTH + Config.BRICK_SPACING_X)) + Config.BRICK_OFFSET_X, 
+										 (lindex * (BRICK_HEIGHT  + Config.BRICK_SPACING_Y)) + Config.BRICK_OFFSET_Y, 
+									     BRICK_WIDTH, BRICK_HEIGHT));
 				}
 				
 				lindex++;

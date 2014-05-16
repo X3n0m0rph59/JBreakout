@@ -10,7 +10,7 @@ enum EffectType {
 					MULTIBALL,
 					ENLARGE_PADDLE, 
 					SHRINK_PADDLE, 
-					CLOSED_BOTTOM, 
+					BOTTOM_WALL, 
 					PADDLE_GUN,
 					STICKY_BALL,
 					SPEED_UP,
@@ -41,10 +41,10 @@ class Effect {
 			break;		
 		
 		case MULTIBALL:
-			App.getMainWindow().getScene().spawnBall();
+			App.getMainWindow().getScene().spawnBall(true);
 			break;
 			
-		case CLOSED_BOTTOM:
+		case BOTTOM_WALL:
 			break;
 			
 		case FIREBALL:
@@ -101,7 +101,7 @@ class Effect {
 		
 		// Un-apply effect
 		switch (type) {
-		case CLOSED_BOTTOM:
+		case BOTTOM_WALL:
 			break;
 			
 		case ENLARGE_PADDLE:
@@ -146,11 +146,11 @@ public final class EffectManager {
 	}
 	
 	public void addEffect(EffectType type) {
-		effectList.add(new Effect(type, 60*30));
+		effectList.add(new Effect(type, Config.SYNC_FPS * Config.EFFECT_DURATION));
 		
 		switch (type) {
-		case CLOSED_BOTTOM:
-			App.getMainWindow().getScene().addTextAnimation("Closed bottom!");
+		case BOTTOM_WALL:
+			App.getMainWindow().getScene().addTextAnimation("Bottom Wall!");
 			break;
 			
 		case ENLARGE_PADDLE:
@@ -192,6 +192,50 @@ public final class EffectManager {
 		Logger.log("New active effect: " + type);
 	}
 	
+	public void expireEffect(Effect e) {		
+		switch (e.getType()) {
+		case BOTTOM_WALL:
+			App.getMainWindow().getScene().addTextAnimation("No more Bottom Wall!");
+			break;
+			
+		case ENLARGE_PADDLE:
+			App.getMainWindow().getScene().addTextAnimation("Shrink again!");
+			break;
+			
+		case FIREBALL:
+			App.getMainWindow().getScene().addTextAnimation("Fireball vanished!");
+			break;
+			
+		case MULTIBALL:			
+			break;
+			
+		case PADDLE_GUN:
+			App.getMainWindow().getScene().addTextAnimation("Guns jammed!");
+			break;
+			
+		case SHRINK_PADDLE:
+			App.getMainWindow().getScene().addTextAnimation("Grow back!");
+			break;	
+			
+		case STICKY_BALL:
+			App.getMainWindow().getScene().addTextAnimation("No more Sticky Ball!");
+			break;
+			
+		case SPEED_UP:
+			App.getMainWindow().getScene().addTextAnimation("Slow down again!");
+			break;	
+			
+		case SLOW_DOWN:
+			App.getMainWindow().getScene().addTextAnimation("Speed up again!");
+			break;
+			
+		default:
+			throw new RuntimeException("Unsupported type: " + e.getType());		
+		}
+		
+		Logger.log("Effect expired: " + e.getType());
+	}
+	
 	public boolean isEffectActive(EffectType effect) {
 		for (Effect e : effectList) {
 			if (e.getType() == effect)
@@ -207,9 +251,8 @@ public final class EffectManager {
 			Effect e = i.next();
 			e.step();
 			
-			if (e.isExpired()) {								
-				Logger.log("Effect expired: " + e.getType());
-				
+			if (e.isExpired()) {
+				expireEffect(e);		
 				i.remove();
 			}
 		}

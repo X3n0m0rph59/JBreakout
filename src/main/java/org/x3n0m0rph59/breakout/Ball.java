@@ -5,17 +5,29 @@ import org.newdawn.slick.geom.Rectangle;
 
 public class Ball extends GameObject {
 	private float x,y,radius = Config.BALL_RADIUS;
-	private float velX = 0, velY = 0;
+	private float velX = 0, velY = 0, angle = 0;
 	private float speed = Config.BALL_SPEED;
 	
-	private boolean destroyed = false; 
+	public enum State { ROLLING, STUCK_TO_PADDLE }
+	private State state = State.ROLLING;
+	
+	private boolean multiball = false;
+	private boolean destroyed = false;
 	
 	public Ball(float x, float y) {
+		this(x, y, false);
+	}
+	
+	public Ball(float x, float y, boolean multiball) {
 		this.x = x;
 		this.y = y;
 		
-		this.velX = (float) Math.sin(-175.0f) * speed;
-		this.velY = (float) Math.cos(-175.0f) * speed;
+		this.multiball = multiball;
+		
+		this.angle = -(180.0f + 45.0f);
+		
+		this.velX = (float) Math.sin(angle) * speed;
+		this.velY = (float) Math.cos(angle) * speed;
 	}
 	
 	@Override
@@ -40,17 +52,21 @@ public class Ball extends GameObject {
 	}
 
 	@Override
-	public void step() {
-		x += velX * Config.getInstance().getSpeedFactor();
-		y += velY * Config.getInstance().getSpeedFactor();
+	public void step() {		
+		if (state != State.STUCK_TO_PADDLE) {
+			x += velX * Config.getInstance().getSpeedFactor();
+			y += velY * Config.getInstance().getSpeedFactor();
+		}
 	}
 
 	@Override
 	public Rectangle getBoundingBox() {
-		return new Rectangle(x, y, radius * 2, radius * 2);
+		return new Rectangle(x, y, radius, radius);
 	}
 	
-	public void setAngleOfReflection(float angle) {	
+	public void setAngleOfReflection(float angle) {
+		this.angle = angle;
+		
 		velX = (float) Math.sin(angle) * speed;
 		velY = (float) Math.cos(angle) * speed;
 	}
@@ -82,5 +98,33 @@ public class Ball extends GameObject {
 	
 	public float getVelY() {
 		return velY;
+	}
+
+	public State getState() {
+		return state;
+	}
+
+	public void setState(State state) {
+		this.state = state;
+	}
+
+	public void moveBy(float dX, float dY) {
+		this.x += dX;
+		this.y += dY;
+	}
+
+	public void changeSpeed(float v) {
+		speed *= v;
+		
+		velX = (float) Math.sin(angle) * speed;
+		velY = (float) Math.cos(angle) * speed;
+	}
+
+	public boolean isMultiball() {
+		return multiball;
+	}
+
+	public float getAngle() {
+		return angle;
 	}
 }

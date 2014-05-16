@@ -5,7 +5,8 @@ import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.geom.Rectangle;
 
 public class Paddle extends GameObject {
-	protected float x, y, width = Config.PADDLE_DEFAULT_WIDTH, height = Config.PADDLE_HEIGHT;
+	private float x, y, width = Config.PADDLE_DEFAULT_WIDTH, height = Config.PADDLE_HEIGHT;	
+	private float lastX = 0, lastY = 0;
 	
 	@Override
 	public void render() {
@@ -23,12 +24,28 @@ public class Paddle extends GameObject {
 	
 	@Override
 	public void step() {
+		// Clamp mouse to client rect to avoid 
+		// choppy paddle movement
+		int new_x = Mouse.getX(), 
+			new_y = Mouse.getY();
+		
+		if (new_x > Config.CLIENT_WIDTH)
+			new_x = (int) (Config.CLIENT_WIDTH);
+		
+		Mouse.setCursorPosition(new_x, new_y);
+		
 		setCenteredPosition(Mouse.getX(), Mouse.getY());
 	}
 	
 	public void setCenteredPosition(float x, float y) {
 		this.x = x - width / 2;		
 		this.y = Config.PADDLE_DEFAULT_Y;
+				
+		if (this.x < 0) 
+			this.x = 0;
+		
+		if (this.x > Config.CLIENT_WIDTH - this.width) 
+			this.x = Config.CLIENT_WIDTH - this.width;
 	}
 
 	@Override
@@ -74,5 +91,19 @@ public class Paddle extends GameObject {
 
 	public void setHeight(float height) {
 		this.height = height;
+	}
+
+	public float getdX() {
+		float result = x - lastX;		
+		lastX = x;
+		
+		return result;
+	}
+	
+	public float getdY() {
+		float result = y - lastY;		
+		lastY = y;		
+		
+		return result;
 	}
 }

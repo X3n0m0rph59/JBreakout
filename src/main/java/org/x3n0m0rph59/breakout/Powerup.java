@@ -20,7 +20,7 @@ public class Powerup extends GameObject {
 		GL11.glBegin(GL11.GL_QUADS);
 
 			switch (type) {
-			case CLOSED_BOTTOM:
+			case BOTTOM_WALL:
 				GL11.glColor3f(0.0f, 0.0f, 0.0f);
 				break;
 			case ENLARGE_PADDLE:

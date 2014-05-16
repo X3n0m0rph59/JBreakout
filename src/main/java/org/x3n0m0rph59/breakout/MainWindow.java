@@ -1,6 +1,5 @@
 package org.x3n0m0rph59.breakout;
 
-import org.x3n0m0rph59.breakout.SoundLayer.Sounds;
 import org.lwjgl.input.*;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
@@ -13,6 +12,8 @@ public class MainWindow {
 	private Scene scene;
 	
 	public MainWindow() {
+		Display.setTitle(Config.APP_NAME + " " + Config.APP_VERSION);
+		
 		this.initOpenGL();
 				
 		// Try to hide the cursor 
@@ -25,30 +26,44 @@ public class MainWindow {
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 		}		
-		
-		this.scene = new Scene();
 	}
 	
 	public void show() {
-		SoundLayer.playSound(Sounds.WELCOME);		
+		scene = new Scene();
+		scene.setState(Scene.State.GREETING);
 		
 		while (!Display.isCloseRequested()) {									
 			scene.step();
 			scene.render();
 			
 			Display.update();
-			Display.sync(60);
+			Display.sync(Config.SYNC_FPS);
 		}
-		
-		SoundLayer.playSound(Sounds.QUIT);
-		
+						
 		Display.destroy();
 	}
 	
 	private void initOpenGL() {
 		try {
-			Display.setDisplayModeAndFullscreen(new DisplayMode((int) Config.SCREEN_WIDTH, (int) Config.SCREEN_HEIGHT));
-			Display.create();
+			DisplayMode displayMode = null;
+			
+			if (Config.FULLSCREEN) {				
+		        DisplayMode[] modes = Display.getAvailableDisplayModes();
+	
+				for (int i = 0; i < modes.length; i++) {
+					 if (modes[i].getWidth() == Config.SCREEN_WIDTH && 
+					     modes[i].getHeight() == Config.SCREEN_HEIGHT && 
+					     modes[i].isFullscreenCapable()) {
+						 
+					        displayMode = modes[i];
+					 }
+				}
+			} else {
+				displayMode = new DisplayMode((int) Config.SCREEN_WIDTH, (int) Config.SCREEN_HEIGHT);
+			}
+			
+			Display.setDisplayModeAndFullscreen(displayMode);	
+			Display.create();			
 			Display.setVSyncEnabled(true);
 			
 			//GL11.glEnable(GL11.GL_TEXTURE_2D);
