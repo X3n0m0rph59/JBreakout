@@ -50,6 +50,9 @@ public class ScoreBoard {
 		int ballsLeft = currentScene.getBallsLeft();
 		
 		// Draw separator bar
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		GL11.glDisable(GL11.GL_BLEND);
+		
 		GL11.glBegin(GL11.GL_QUADS);
 			GL11.glColor3f(1.0f, 1.0f, 0.0f);			
 			GL11.glVertex2f(Config.SCREEN_WIDTH - Config.SCOREBOARD_WIDTH, 0);

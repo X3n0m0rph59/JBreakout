@@ -16,6 +16,7 @@ import org.newdawn.slick.TrueTypeFont;
 
 public final class Scene {
 	public enum State {LOADING, GREETING, WAITING_FOR_BALL, RUNNING, STAGE_CLEARED, RESTART, PAUSED, GAME_OVER, TERMINATED};
+	private enum ParticleEffect {BRICK_EXPLOSION, BALL_LOST};
 	private State state = State.LOADING;
 	
 	private ScoreBoard scoreBoard = new ScoreBoard();	
@@ -28,9 +29,10 @@ public final class Scene {
 	private List<Ball> balls = new ArrayList<Ball>();
 	private List<Brick> bricks = new ArrayList<Brick>();
 	private List<Powerup> powerups = new ArrayList<Powerup>();
-	private List<Particle> particles = new ArrayList<Particle>();
+	private List<Star> particles = new ArrayList<Star>();
 	private List<Projectile> projectiles = new ArrayList<Projectile>();	
 	private List<TextAnimation> textAnimations = new ArrayList<TextAnimation>();
+	private List<ParticleSystem> particleEffects = new ArrayList<ParticleSystem>();
 		
 	private TrueTypeFont font;
 	
@@ -45,6 +47,8 @@ public final class Scene {
 	private void initLevel(int level) {		
 		EffectManager.getInstance().clearEffects();
 		
+		paddle.setWidth(Config.PADDLE_DEFAULT_WIDTH);
+		
 		balls.clear();
 		balls.add(new Ball(Config.BALL_SPAWN_X, Config.BALL_SPAWN_Y));
 		
@@ -56,11 +60,11 @@ public final class Scene {
 				
 		// Spawn initial set of particles
 		particles.clear();
-		for (int i = 0; i < Config.SYNC_FPS * Config.PARTICLE_DENSITY ; i++) {
-			particles.add(new Particle(Util.random(0, (int) Config.CLIENT_WIDTH), 
+		for (int i = 0; i < Config.SYNC_FPS * Config.STAR_DENSITY ; i++) {
+			particles.add(new Star(Util.random(0, (int) Config.CLIENT_WIDTH), 
 									   Util.random(0, (int) Config.SCREEN_HEIGHT), 
-									   Util.random((int) Config.PARTICLE_MIN_SPEED, 
-											   	   (int) Config.PARTICLE_MAX_SPEED)));
+									   Util.random((int) Config.STAR_MIN_SPEED, 
+											   	   (int) Config.STAR_MAX_SPEED)));
 		}
 	}
 	
@@ -100,7 +104,7 @@ public final class Scene {
 		GL11.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 		
-		for (Particle p : particles) {
+		for (Star p : particles) {
 			p.render();
 		}
 		
@@ -123,6 +127,10 @@ public final class Scene {
 		// Draw a wall on the bottom of the screen?
 		if (EffectManager.getInstance().isEffectActive(EffectType.BOTTOM_WALL)) {
 			drawBottomWall();
+		}
+		
+		for (ParticleSystem p : particleEffects) {
+			p.render();
 		}
 		
 		paddle.render();
@@ -208,6 +216,9 @@ public final class Scene {
 			final float width = Config.BOTTOM_WALL_SEGMENT_WIDTH;
 			final float height = Config.BOTTOM_WALL_SEGMENT_HEIGHT;
 			
+			GL11.glDisable(GL11.GL_TEXTURE_2D);
+			GL11.glDisable(GL11.GL_BLEND);
+			
 			GL11.glBegin(GL11.GL_QUADS);
 				GL11.glColor3f(1.0f, 0.0f, 0.0f);			
 				GL11.glVertex2f(x, y);			
@@ -286,7 +297,7 @@ public final class Scene {
 			
 			EffectManager.getInstance().step();
 			
-			for (Particle p : particles) {
+			for (Star p : particles) {
 				p.step();
 			}
 			
@@ -310,6 +321,11 @@ public final class Scene {
 				textAnimations.get(0).step();
 			
 			
+			for (ParticleSystem p : particleEffects) {
+				p.step();
+			}
+			
+			
 			for (Ball b : balls) {
 				b.step();
 			}
@@ -320,10 +336,10 @@ public final class Scene {
 			doCleanup();
 			
 			// Spawn new particles
-			for (int i = 0; i < Config.PARTICLE_DENSITY; i++) {
-				particles.add(new Particle(Util.random(0, (int) Config.CLIENT_WIDTH), 0f, 
-													   Util.random((int) Config.PARTICLE_MIN_SPEED, 
-															       (int) Config.PARTICLE_MAX_SPEED)));
+			for (int i = 0; i < Config.STAR_DENSITY; i++) {
+				particles.add(new Star(Util.random(0, (int) Config.CLIENT_WIDTH), 0f, 
+													   Util.random((int) Config.STAR_MIN_SPEED, 
+															       (int) Config.STAR_MAX_SPEED)));
 			}
 			
 			// Spawn new projectiles?
@@ -479,63 +495,93 @@ public final class Scene {
 		// Ball vs. Paddle
 		for (Ball ball : balls) {
 			if (ball.getState() != Ball.State.STUCK_TO_PADDLE) {
-				if (Util.collisionTest(paddle.getBoundingBox(), ball.getBoundingBox())) {
-					float angle; 
+				if (Util.collisionTest(paddle.getBoundingBox(), ball.getBoundingBox())) {					
+					final Edge edge = Util.getCollisionEdge(ball.getBoundingBox(), paddle.getBoundingBox());
+					Logger.log("Ball vs. paddle Collision at: " + edge);
 					
-					switch (Util.getCollisionEdge(ball.getBoundingBox(), paddle.getBoundingBox())) {
+					switch (edge) {
 					case LEFT:
-						angle = ball.getAngle() * -1;
-						ball.setAngleOfReflection(angle);
+						// reflect with deflection
+						ball.setAngle((ball.getAngle() - 90.0f) * -1);
+						
+						// avoid double collisions by displacing the ball besides the paddle
+						ball.setPosition(ball.getBoundingBox().getX() + ball.getBoundingBox().getWidth() + 1.0f, 
+										 ball.getBoundingBox().getY());
 						break;
 						
 					case TOP_LEFT:
-						angle = ball.getAngle() * -1;
-						ball.setAngleOfReflection(angle);
-						break;
+						// reflect with deflection
+						ball.setAngle((ball.getAngle() - 75.0f) * -1);
 						
-					case TOP:
-						// TODO: calculate fractional angle of reflection 
-						// 		 based on paddle surface impact point to 
-						// 		 simulate a curved surface
-						final float ballX = ball.getBoundingBox().getCenterX();												
-						final float paddleCenter = paddle.getBoundingBox().getCenterX();						
-						final float deviationFromCenter = ballX - paddleCenter;						
-						final float fractionalAngle = deviationFromCenter * 0.25f;
-									
-						angle = ball.getAngle() + (360 - Math.abs(ball.getAngle()));						
-						
-						Logger.log("Deviation from center: " + deviationFromCenter +
-								   " Fractional angle: " + fractionalAngle + 
-								   " angle: " + ball.getAngle() +  
-								   " final angle: " + angle);
-						
-						ball.setAngleOfReflection(angle);												
-						break;
-						
-					case TOP_RIGHT:
-						angle = ball.getAngle() * -1;
-						ball.setAngleOfReflection(angle);
+						// avoid double collisions by displacing the ball besides the paddle
+						ball.setPosition(ball.getBoundingBox().getX() + ball.getBoundingBox().getWidth() + 1.0f, 
+										 paddle.getBoundingBox().getY() - 
+										 (ball.getBoundingBox().getHeight() + 1.0f));
 						break;
 						
 					case RIGHT:
-						angle = ball.getAngle() * -1;
-						ball.setAngleOfReflection(angle);
-						break;									
+						// reflect with deflection
+						ball.setAngle((ball.getAngle() + 90.0f) * -1);
 						
-					case BOTTOM_RIGHT:
-						angle = ball.getAngle() * -1;
-						ball.setAngleOfReflection(angle);
+						// avoid double collisions by displacing the ball besides the paddle
+						ball.setPosition(paddle.getBoundingBox().getX() + paddle.getBoundingBox().getWidth() + 1.0f, 
+										 ball.getBoundingBox().getY());
 						break;
 						
+					case TOP_RIGHT:
+						// reflect with deflection
+						ball.setAngle((ball.getAngle() + 75.0f) * -1);
+						
+						// avoid double collisions by displacing the ball besides the paddle
+						ball.setPosition(paddle.getBoundingBox().getX() + paddle.getBoundingBox().getWidth() + 1.0f, 
+										 paddle.getBoundingBox().getY() - 
+										 (ball.getBoundingBox().getHeight() + 1.0f));
+						break;
+						
+					case TOP:
 					case BOTTOM:
-						angle = ball.getAngle() * -1;
-						ball.setAngleOfReflection(angle);
+						// calculate fractional angle of deflection 
+						// based on paddle surface impact point to 
+						// simulate a curved surface
+						final float ballX = ball.getBoundingBox().getCenterX();												
+						final float paddleCenter = paddle.getBoundingBox().getCenterX();						
+						final float deviationFromCenter = ballX - paddleCenter;						
+						
+						// Parameters for linear conversion:
+						final float minPaddleImpactPoint = 0 - (paddle.getWidth() / 2); 
+						final float maxPaddleImpactPoint = 0 + (paddle.getWidth() / 2);
+						
+						final float minAngleDelta = -10.0f;
+						final float maxAngleDelta = +10.0f;
+						
+						float angleD = ((deviationFromCenter - minPaddleImpactPoint) * (maxAngleDelta - minAngleDelta) / 
+										(maxPaddleImpactPoint - minPaddleImpactPoint)) + minAngleDelta;
+ 
+						// reflect with deflection
+						final float angle = (ball.getAngle() + angleD) * -1;
+						ball.setAngle(angle);
+
+						
+						// avoid double collisions by displacing the ball above the paddle
+						ball.setPosition(ball.getBoundingBox().getX(), 
+										 paddle.getBoundingBox().getY() - 
+										 (ball.getBoundingBox().getHeight() + 1.0f));					
+												
+												
+						Logger.log("Deviation from center: " + deviationFromCenter +
+								   " angleD: " + angleD + 
+								   " angle: " + ball.getAngle() +  
+								   " final angle: " + angle);						
+						break;
+						
+																				
+					case BOTTOM_RIGHT:
+						ball.reflect();
 						break;
 						
 					case BOTTOM_LEFT:
-						angle = ball.getAngle() * -1;
-						ball.setAngleOfReflection(angle);
-						break;
+						ball.reflect();
+						break;	
 	
 					default:
 						throw new RuntimeException("Invalid egde type");				
@@ -544,15 +590,20 @@ public final class Scene {
 					
 					// Compute ball speed change due to paddle velocity
 					// Parameters for linear conversion:
-					final float minBallSpeedDelta = 1.0f; 
-					final float maxBallSpeedDelta = 1.5f;
+					final float minBallSpeedDelta = 0.5f; 
+					final float maxBallSpeedDelta = 2.0f;
 					
-					final float minPaddleDeltaX =  0.0f;
-					final float maxPaddleDeltaX = 10.0f;
+					final float minPaddleDeltaX = -15.0f;
+					final float maxPaddleDeltaX = +15.0f;
 					
-					float velD = ((Math.abs(pdx) - minPaddleDeltaX) * (maxBallSpeedDelta - minBallSpeedDelta) / 
-									(maxPaddleDeltaX - minPaddleDeltaX)) + minBallSpeedDelta;
-					ball.changeSpeed(velD);
+					float velD = 1.0f;
+					if (pdx != 0.0f) {
+						velD = ((pdx - minPaddleDeltaX) * (maxBallSpeedDelta - minBallSpeedDelta) / 
+								(maxPaddleDeltaX - minPaddleDeltaX)) + minBallSpeedDelta;
+					}
+					
+					ball.changeSpeed(velD);					
+					Logger.log("Paddle delta_x: " + pdx + " Velocity delta: " + velD);
 					
 					
 					// Sticky ball?
@@ -594,6 +645,12 @@ public final class Scene {
 
 	private void brickHit(Brick b, Ball ball, boolean hitByProjectile) {
 		b.hit();
+		
+		if (b.isDestroyed()) {
+			addParticleEffect(b.getBoundingBox().getCenterX(), 
+							  b.getBoundingBox().getCenterY(), 
+							  ParticleEffect.BRICK_EXPLOSION);
+		}
 		
 		if (hitByProjectile) {
 			if (b.getType() != Brick.Type.SOLID) {
@@ -709,9 +766,9 @@ public final class Scene {
 		}
 				
 		// Remove excess particles
-		Iterator<Particle> pi = particles.iterator();		
+		Iterator<Star> pi = particles.iterator();		
 		while (pi.hasNext()) {
-			Particle p = pi.next();
+			Star p = pi.next();
 			
 			if (p.getY() >= Config.SCREEN_HEIGHT) {
 				pi.remove();
@@ -745,6 +802,16 @@ public final class Scene {
 			
 			if (a.isDestroyed()) {
 				tai.remove();
+			}
+		}
+		
+		// Remove expired particle effects
+		Iterator<ParticleSystem> psi = particleEffects.iterator();		
+		while (psi.hasNext()) {
+			ParticleSystem ps = psi.next();
+			
+			if (ps.isDestroyed()) {
+				psi.remove();
 			}
 		}
 	}
@@ -837,6 +904,23 @@ public final class Scene {
 			
 		default:
 			throw new RuntimeException("Invalid state: " + state);
+		}
+	}
+	
+	private void addParticleEffect(float x, float y, ParticleEffect effect) {		
+		switch (effect) {
+		case BRICK_EXPLOSION:		
+			particleEffects.add(new ParticleSystem(new SpriteTuple[]{new SpriteTuple("data/sprites/fire.png", 198.0f, 197.0f, 198, 197)}, 
+					x, y, 20.0f, 10.0f, 0.0f, 360.0f, 15.0f, 55.0f, 2.0f));
+			break;
+			
+		case BALL_LOST:		
+//			particleEffects.add(new ParticleSystem(new SpriteTuple[]{new SpriteTuple("data/sprites/Star1.png", 255.0f, 255.0f, 255, 255), 
+//					  new SpriteTuple("data/sprites/Star2.png", 345.0f, 342.0f, 345, 342), 
+//					  new SpriteTuple("data/sprites/Star3.png", 270.0f, 261.0f, 270, 261), 
+//					  new SpriteTuple("data/sprites/Star4.png", 264.0f, 285.0f, 264, 285)}, 
+//			x, y, 150.0f, 5.0f, 0.0f, 180.0f, 15.0f, 15.0f, 5.0f));
+			break;
 		}
 	}
 }

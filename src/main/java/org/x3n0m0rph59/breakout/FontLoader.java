@@ -75,7 +75,7 @@ class FontTuple {
 
 public class FontLoader {
 	private static final FontLoader instance = new FontLoader();
-	private Map<FontTuple, TrueTypeFont> map = new HashMap<FontTuple, TrueTypeFont>();
+	private Map<FontTuple, TrueTypeFont> map = new HashMap<>();
 	
 	public FontLoader() {
 		primeCache();

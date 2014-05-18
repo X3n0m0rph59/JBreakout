@@ -84,6 +84,12 @@ class MusicStream {
 	public boolean isPlaying() {
 		return music.playing();
 	}
+	
+	public void setPitch(float pitch) {
+		float pos = music.getPosition();
+		music.play(pitch, 1.0f);
+		music.setPosition(pos);
+	}
 }
 
 public final class SoundLayer {
@@ -151,10 +157,20 @@ public final class SoundLayer {
 			m.stop();	
 	}
 	
+	public void setMusicPitch(Musics music, float pitch) {
+		MusicStream m = SoundLayer.getInstance().musicMap.get(music);
+		if (m != null) 
+			m.setPitch(pitch);
+	}
+	
 	public void stopAllMusic()
 	{
 		for (MusicStream ms : musicMap.values()) {
 			ms.stop();
 		}
+	}
+	
+	public void setCurrentMusicPitch(float pitch) {
+		setMusicPitch(Musics.BACKGROUND, pitch);	
 	}	
 }

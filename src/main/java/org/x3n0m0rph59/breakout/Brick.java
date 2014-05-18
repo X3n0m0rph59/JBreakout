@@ -1,6 +1,11 @@
 package org.x3n0m0rph59.breakout;
 
-import org.lwjgl.opengl.GL11;
+import java.util.EnumMap;
+import java.util.Map;
+
+
+
+//import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.geom.Rectangle;
 import org.x3n0m0rph59.breakout.SoundLayer;
 
@@ -16,6 +21,8 @@ public class Brick extends GameObject {
 	private float speed;
 	
 	private int hitCounter = 0;
+	
+	private Map<Type, Sprite> sprites = new EnumMap<Type, Sprite>(Type.class);
 		
 	public Brick(Type type, Behaviour behaviour, float speed, 
 				 float x, float y, float width, float height) {
@@ -29,6 +36,12 @@ public class Brick extends GameObject {
 		
 		this.width = width;
 		this.height = height;
+		
+		sprites.put(Type.NORMAL, new Sprite("data/sprites/brick_normal.png", 255, 159, 255, 159));
+		sprites.put(Type.WEAK, new Sprite("data/sprites/brick_weak.png", 255, 159, 255, 159));
+		sprites.put(Type.HARD, new Sprite("data/sprites/brick_hard.png", 255, 159, 255, 159));
+		sprites.put(Type.SOLID, new Sprite("data/sprites/brick_solid.png", 255, 159, 255, 159));
+		sprites.put(Type.POWERUP, new Sprite("data/sprites/brick_powerup.png", 255, 159, 255, 159));
 	}
 	
 	@Override
@@ -52,83 +65,88 @@ public class Brick extends GameObject {
 		}
 		
 		
-		switch (type) {		
-		case NORMAL:
-			GL11.glBegin(GL11.GL_QUADS);
-				GL11.glColor3f(0.0f, 1.0f, 0.0f);
-				GL11.glVertex2f(x, y);
-				GL11.glColor3f(0.0f, 1.0f, 0.0f);
-				GL11.glVertex2f(x + width, y);
-				GL11.glColor3f(0.0f, 1.0f, 0.0f);
-				GL11.glVertex2f(x + width, y + height);
-				GL11.glColor3f(0.0f, 1.0f, 0.0f);
-				GL11.glVertex2f(x, y + height);
-			GL11.glEnd();
-			break;
-			
-		case WEAK:
-			GL11.glBegin(GL11.GL_QUADS);
-				GL11.glColor3f(0.5f, 1.0f, 0.5f);			
-				GL11.glVertex2f(x, y);
-				GL11.glColor3f(0.5f, 1.0f, 0.5f);
-				GL11.glVertex2f(x + width, y);
-				GL11.glColor3f(0.5f, 1.0f, 0.5f);
-				GL11.glVertex2f(x + width, y + height);
-				GL11.glColor3f(0.5f, 1.0f, 0.5f);
-				GL11.glVertex2f(x, y + height);
-			GL11.glEnd();
-			break;
-			
-		case HARD:
-			GL11.glBegin(GL11.GL_QUADS);
-				GL11.glColor3f(1.0f, 0.0f, 0.0f);			
-				GL11.glVertex2f(x, y);			
-				GL11.glVertex2f(x + width, y);			
-				GL11.glVertex2f(x + width, y + height);			
-				GL11.glVertex2f(x, y + height);
-			GL11.glEnd();
-			break;
-			
-		case POWERUP:
-			GL11.glBegin(GL11.GL_QUADS);
-				GL11.glColor3f(1.0f, 0.0f, 0.0f);			
-				GL11.glVertex2f(x, y);
-				GL11.glColor3f(0.0f, 1.0f, 0.0f);
-				GL11.glVertex2f(x + width, y);
-				GL11.glColor3f(0.0f, 0.0f, 1.0f);
-				GL11.glVertex2f(x + width, y + height);
-				GL11.glColor3f(1.0f, 1.0f, 0.0f);
-				GL11.glVertex2f(x, y + height);
-			GL11.glEnd();
-			break;
-			
-		case SOLID:
-			GL11.glBegin(GL11.GL_QUADS);
-				GL11.glColor3f(0.0f, 0.0f, 0.25f);			
-				GL11.glVertex2f(x, y);			
-				GL11.glVertex2f(x + width, y);			
-				GL11.glVertex2f(x + width, y + height);			
-				GL11.glVertex2f(x, y + height);
-			GL11.glEnd();
-			break;
-			
-		default:
-			throw new RuntimeException("Unsupported brick type");			
-		}
+		Sprite sprite = sprites.get(type);
+		if (sprite != null)
+			sprite.render(x, y, width, height);
+		
+		
+//		switch (type) {		
+//		case NORMAL:
+//			GL11.glBegin(GL11.GL_QUADS);
+//				GL11.glColor3f(0.0f, 1.0f, 0.0f);
+//				GL11.glVertex2f(x, y);
+//				GL11.glColor3f(0.0f, 1.0f, 0.0f);
+//				GL11.glVertex2f(x + width, y);
+//				GL11.glColor3f(0.0f, 1.0f, 0.0f);
+//				GL11.glVertex2f(x + width, y + height);
+//				GL11.glColor3f(0.0f, 1.0f, 0.0f);
+//				GL11.glVertex2f(x, y + height);
+//			GL11.glEnd();
+//			break;
+//			
+//		case WEAK:
+//			GL11.glBegin(GL11.GL_QUADS);
+//				GL11.glColor3f(0.5f, 1.0f, 0.5f);			
+//				GL11.glVertex2f(x, y);
+//				GL11.glColor3f(0.5f, 1.0f, 0.5f);
+//				GL11.glVertex2f(x + width, y);
+//				GL11.glColor3f(0.5f, 1.0f, 0.5f);
+//				GL11.glVertex2f(x + width, y + height);
+//				GL11.glColor3f(0.5f, 1.0f, 0.5f);
+//				GL11.glVertex2f(x, y + height);
+//			GL11.glEnd();
+//			break;
+//			
+//		case HARD:
+//			GL11.glBegin(GL11.GL_QUADS);
+//				GL11.glColor3f(1.0f, 0.0f, 0.0f);			
+//				GL11.glVertex2f(x, y);			
+//				GL11.glVertex2f(x + width, y);			
+//				GL11.glVertex2f(x + width, y + height);			
+//				GL11.glVertex2f(x, y + height);
+//			GL11.glEnd();
+//			break;
+//			
+//		case POWERUP:
+//			GL11.glBegin(GL11.GL_QUADS);
+//				GL11.glColor3f(1.0f, 0.0f, 0.0f);			
+//				GL11.glVertex2f(x, y);
+//				GL11.glColor3f(0.0f, 1.0f, 0.0f);
+//				GL11.glVertex2f(x + width, y);
+//				GL11.glColor3f(0.0f, 0.0f, 1.0f);
+//				GL11.glVertex2f(x + width, y + height);
+//				GL11.glColor3f(1.0f, 1.0f, 0.0f);
+//				GL11.glVertex2f(x, y + height);
+//			GL11.glEnd();
+//			break;
+//			
+//		case SOLID:
+//			GL11.glBegin(GL11.GL_QUADS);
+//				GL11.glColor3f(0.0f, 0.0f, 0.25f);			
+//				GL11.glVertex2f(x, y);			
+//				GL11.glVertex2f(x + width, y);			
+//				GL11.glVertex2f(x + width, y + height);			
+//				GL11.glVertex2f(x, y + height);
+//			GL11.glEnd();
+//			break;
+//			
+//		default:
+//			throw new RuntimeException("Unsupported brick type");			
+//		}
 	}
 	
 	@Override
 	public void step() {
 		switch (behaviour) {
 		case MOVE_LEFT:
-			x -= speed;
+			x -= speed * Config.getInstance().getSpeedFactor();;
 			
 			if (x + width <= 0 + Config.BRICK_OFFSET_X)
 				x = Config.CLIENT_WIDTH - Config.BRICK_OFFSET_X;
 			break;
 			
 		case MOVE_RIGHT:
-			x += speed;
+			x += speed * Config.getInstance().getSpeedFactor();;
 			
 			if (x >= Config.CLIENT_WIDTH - Config.BRICK_OFFSET_X)
 				x = Config.BRICK_OFFSET_X - width;
@@ -138,6 +156,9 @@ public class Brick extends GameObject {
 			// do nothing
 			break;
 		}
+		
+		for (Sprite s : sprites.values())
+			s.step();
 	}
 	
 	@Override

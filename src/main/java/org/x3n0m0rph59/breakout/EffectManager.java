@@ -54,13 +54,14 @@ class Effect {
 			break;
 			
 		case SHRINK_PADDLE:
+			App.getMainWindow().getScene().getPaddle().shrink();
 			break;
 			
 		case STICKY_BALL:
 			break;
 			
 		case SPEED_UP:
-			Config.getInstance().increaseGameSpeed(Config.POWERUP_SPEEDUP_FACTOR);
+			Config.getInstance().increaseGameSpeed(Config.POWERUP_SPEEDUP_FACTOR);			
 			break;
 			
 		case SLOW_DOWN:
@@ -128,7 +129,7 @@ class Effect {
 			break;
 			
 		case SLOW_DOWN:
-			Config.getInstance().increaseGameSpeed(Config.POWERUP_SLOWDOWN_FACTOR);
+			Config.getInstance().increaseGameSpeed(Config.POWERUP_SLOWDOWN_FACTOR);			
 			break;
 			
 		default:
