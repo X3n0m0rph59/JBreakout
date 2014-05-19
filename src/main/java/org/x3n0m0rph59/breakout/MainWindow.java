@@ -66,13 +66,15 @@ public class MainWindow {
 			Display.create();			
 			Display.setVSyncEnabled(true);
 			
-			//GL11.glEnable(GL11.GL_TEXTURE_2D);
+			GL11.glEnable(GL11.GL_TEXTURE_2D);
 			GL11.glShadeModel(GL11.GL_SMOOTH);       
 			GL11.glDisable(GL11.GL_DEPTH_TEST);
 			GL11.glDisable(GL11.GL_LIGHTING);
 			
-			GL11.glDisable(GL11.GL_BLEND);
-			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+			GL11.glAlphaFunc(GL11.GL_GEQUAL, 0.0f);
+			GL11.glEnable(GL11.GL_ALPHA_TEST);
+			GL11.glEnable(GL11.GL_BLEND);
+			GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);			
 			
 			GL11.glDisable(GL11.GL_CULL_FACE);
 			

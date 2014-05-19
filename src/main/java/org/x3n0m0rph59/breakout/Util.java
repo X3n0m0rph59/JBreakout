@@ -56,7 +56,7 @@ public final class Util {
 
 	public static int random(int min, int max) {
 		Random rnd = new Random();
-		return rnd.nextInt((max - min) + 1) + min;			
+		return rnd.nextInt((max - min) + 1) + min;
 	}
 
 	public static int sign(float val) {
@@ -68,5 +68,12 @@ public final class Util {
 			return -1;
 		
 		throw new RuntimeException("Invalid code reached");
+	}
+
+	public static int max(int p1, int p2) {
+		if (p1 > p2)
+			return p1;
+		else
+			return p2;
 	}
 }

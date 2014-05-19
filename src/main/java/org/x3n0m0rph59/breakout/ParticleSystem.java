@@ -6,61 +6,21 @@ import java.util.List;
 
 import org.newdawn.slick.geom.Rectangle;
 
-class SpriteTuple {
-	private String fileName;
-	private float width, height;
-	private int tw, th;
-		
-	public SpriteTuple(String fileName, float width, float height, int tw, int th) {		
-		this.fileName = fileName;
-		this.width = width;
-		this.height = height;
-		this.tw = tw;
-		this.th = th;
-	}
-	
-	public String getFileName() {
-		return fileName;
-	}
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
-	}
-	public float getWidth() {
-		return width;
-	}
-	public void setWidth(float width) {
-		this.width = width;
-	}
-	public float getHeight() {
-		return height;
-	}
-	public void setHeight(float height) {
-		this.height = height;
-	}
-	public int getTw() {
-		return tw;
-	}
-	public void setTw(int tw) {
-		this.tw = tw;
-	}
-	public int getTh() {
-		return th;
-	}
-	public void setTh(int th) {
-		this.th = th;
-	}
-}
-
 public class ParticleSystem extends GameObject {	
-	private float x, y, lifeTime, particleDensity, angle, angularDeviation, ttl, speed, sizeFactor;
+	private float x, y, lifeTime, particleDensity, angle, 
+				  angularDeviation, angularMomentum, 
+				  ttl, speed, sizeFactor;
+	
 	private int frameCounter = 0;	
+	
 	private boolean destroyed = false;
 	
 	private List<Particle> particles = new LinkedList<>();	
 	private List<Sprite> spriteList = new LinkedList<>();
 
 	public ParticleSystem(SpriteTuple[] sprites, float x, float y, float lifeTime, float particleDensity, 
-						  float angle, float angularDeviation,  float ttl, float speed, float sizeFactor) {
+						  float angle, float angularDeviation, float angularMomentum, float ttl, float speed, 
+						  float sizeFactor) {
 		this.x = x;
 		this.y = y;
 		
@@ -70,6 +30,8 @@ public class ParticleSystem extends GameObject {
 		
 		this.angle = angle;
 		this.angularDeviation = angularDeviation;
+		
+		this.angularMomentum = angularMomentum;
 		
 		this.ttl = ttl;
 		
@@ -129,7 +91,7 @@ public class ParticleSystem extends GameObject {
 		
 		Sprite sprite = spriteList.get(Util.random(0, spriteList.size() - 1));
 															  
-		particles.add(new Particle(sprite, this.x, this.y, dx, dy, ttl, this.sizeFactor));
+		particles.add(new Particle(sprite, this.x, this.y, dx, dy, angularMomentum, ttl, this.sizeFactor));
 	}
 	
 	public void setPosition(float x, float y, float angle) {

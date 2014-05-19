@@ -11,10 +11,10 @@ public class Paddle extends GameObject {
 	private Sprite sprite = new Sprite("data/sprites/paddle.png", width, height, 600, 150);
 	
 	private ParticleSystem leftEngine = new ParticleSystem(new SpriteTuple[]{new SpriteTuple("data/sprites/fire.png", 198.0f, 197.0f, 198, 197)}, 
-			   x, y, 0.0f, 4.0f, 0.0f, 45.0f, 15.0f, 2.0f, 0.5f);
+			   x, y, 0.0f, 5.0f, 0.0f, 45.0f, 0.0f, 15.0f, 2.0f, 2.5f);
 	
 	private ParticleSystem rightEngine = new ParticleSystem(new SpriteTuple[]{new SpriteTuple("data/sprites/fire.png", 198.0f, 197.0f, 198, 197)}, 
-			   x, y, 0.0f, 4.0f, 0.0f, 45.0f, 15.0f, 2.0f, 0.5f);
+			   x, y, 0.0f, 5.0f, 0.0f, 45.0f, 0.0f, 15.0f, 2.0f, 2.5f);
 	
 	@Override
 	public void render() {
@@ -64,8 +64,12 @@ public class Paddle extends GameObject {
 		if (this.x > Config.CLIENT_WIDTH - this.width) 
 			this.x = Config.CLIENT_WIDTH - this.width;
 		
-		leftEngine.setPosition(this.x, (this.y + this.height), (float) Math.toRadians(135.0f));
-		rightEngine.setPosition((this.x + this.width), (this.y + this.height), (float) Math.toRadians(135.0f));
+		updateEnginePosition();
+	}
+
+	private void updateEnginePosition() {
+		leftEngine.setPosition(this.x + Config.PADDLE_ENGINE_OFFSET, (this.y + this.height), (float) Math.toRadians(180.0f - 90.0f));
+		rightEngine.setPosition((this.x + this.width) - Config.PADDLE_ENGINE_OFFSET, (this.y + this.height), (float) Math.toRadians(180.0f - 90.0f));
 	}
 
 	@Override
@@ -88,8 +92,7 @@ public class Paddle extends GameObject {
 	public void setX(float x) {
 		this.x = x;
 		
-		leftEngine.setPosition(x, y + this.height, (float) Math.toRadians(180.0f));
-		rightEngine.setPosition(x + this.width, y + this.height, (float) Math.toRadians(180.0f));
+		updateEnginePosition();
 	}
 
 	public float getY() {
@@ -99,8 +102,7 @@ public class Paddle extends GameObject {
 	public void setY(float y) {
 		this.y = y;
 		
-		leftEngine.setPosition(x, y + this.height, (float) Math.toRadians(180.0f));
-		rightEngine.setPosition(x + this.width, y + this.height, (float) Math.toRadians(180.0f));
+		updateEnginePosition();
 	}
 
 	public float getWidth() {
@@ -110,8 +112,7 @@ public class Paddle extends GameObject {
 	public void setWidth(float width) {
 		this.width = width;
 		
-		leftEngine.setPosition(x, y + this.height, (float) Math.toRadians(180.0f));
-		rightEngine.setPosition(x + this.width, y + this.height, (float) Math.toRadians(180.0f));
+		updateEnginePosition();
 	}
 
 	public float getHeight() {
@@ -121,8 +122,7 @@ public class Paddle extends GameObject {
 	public void setHeight(float height) {
 		this.height = height;
 		
-		leftEngine.setPosition(x, y + this.height, (float) Math.toRadians(180.0f));
-		rightEngine.setPosition(x + this.width, y + this.height, (float) Math.toRadians(180.0f));
+		updateEnginePosition();
 	}
 
 	public float getdX() {

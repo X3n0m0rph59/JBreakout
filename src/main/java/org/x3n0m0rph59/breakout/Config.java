@@ -38,6 +38,10 @@ public final class Config {
 	
 	public static final int EFFECT_DURATION = 15;
 	
+	public static final float BACKGROUND_MIN_SPEED = 1.0f;
+	public static final float BACKGROUND_MAX_SPEED = 4.0f;
+	public static final int BACKGROUND_DENSITY = 400;
+	
 //	public static final float BRICK_WIDTH = 33.5f;
 	public static final float BRICK_HEIGHT = 18.0f;
 	public static final float BRICK_OFFSET_X = 50.0f;
@@ -54,6 +58,7 @@ public final class Config {
 	public static final float PADDLE_DEFAULT_WIDTH = 100.0f;
 	public static final float PADDLE_EXPANSION = 40.0f;
 	public static final float PADDLE_HEIGHT = 25.0f;
+	public static final float PADDLE_ENGINE_OFFSET = 5.0f;
 	
 	public static final int STAR_DENSITY = 2;
 	public static final float STAR_WIDTH = 2.5f;
@@ -75,7 +80,7 @@ public final class Config {
 	public static final float BOTTOM_WALL_SEGMENT_SPACING = 5.0f;
 	
 	
-	private static final Config instance = new Config();
+	private static final Config instance = new Config();	
 	private float speedFactor = 1.0f;
 	
 	public Config() {

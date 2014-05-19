@@ -29,10 +29,11 @@ public final class Scene {
 	private List<Ball> balls = new ArrayList<Ball>();
 	private List<Brick> bricks = new ArrayList<Brick>();
 	private List<Powerup> powerups = new ArrayList<Powerup>();
-	private List<Star> particles = new ArrayList<Star>();
+	private List<Star> stars = new ArrayList<Star>();
 	private List<Projectile> projectiles = new ArrayList<Projectile>();	
 	private List<TextAnimation> textAnimations = new ArrayList<TextAnimation>();
 	private List<ParticleSystem> particleEffects = new ArrayList<ParticleSystem>();
+	private List<Background> backgrounds = new ArrayList<>();
 		
 	private TrueTypeFont font;
 	
@@ -59,33 +60,32 @@ public final class Scene {
 		textAnimations.clear();
 				
 		// Spawn initial set of particles
-		particles.clear();
+		stars.clear();
 		for (int i = 0; i < Config.SYNC_FPS * Config.STAR_DENSITY ; i++) {
-			particles.add(new Star(Util.random(0, (int) Config.CLIENT_WIDTH), 
+			stars.add(new Star(Util.random(0, (int) Config.CLIENT_WIDTH), 
 									   Util.random(0, (int) Config.SCREEN_HEIGHT), 
 									   Util.random((int) Config.STAR_MIN_SPEED, 
 											   	   (int) Config.STAR_MAX_SPEED)));
 		}
+		
+		backgrounds.add(BackgroundFactory.getRandomBackground());
 	}
 	
 	private void drawCenteredText(String[] lines, boolean eraseBackground) {
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		GL11.glEnable(GL11.GL_BLEND);
+		
 		if (eraseBackground)
 		{			
-			GL11.glBlendFunc(GL11.GL_ONE_MINUS_SRC_COLOR, GL11.GL_ONE_MINUS_DST_COLOR);
-			GL11.glEnable(GL11.GL_BLEND);
-			
 			GL11.glBegin(GL11.GL_QUADS);
-				GL11.glColor4f(0.0f, 0.0f, 0.0f, 0.25f);
+				GL11.glColor4f(0.0f, 0.0f, 0.0f, 0.85f);
 				GL11.glVertex2f(0, 0);			
 				GL11.glVertex2f(Config.CLIENT_WIDTH, 0);			
 				GL11.glVertex2f(Config.CLIENT_WIDTH, Config.SCREEN_HEIGHT);			
 				GL11.glVertex2f(0, Config.SCREEN_HEIGHT);
 			GL11.glEnd();
 		}
-								
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GL11.glEnable(GL11.GL_BLEND);
-		
+												
 		int cnt = 0;
 		for (String line : lines) {
 			int width = font.getWidth(line);
@@ -104,7 +104,13 @@ public final class Scene {
 		GL11.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 		
-		for (Star p : particles) {
+		GL11.glPushMatrix();		
+		
+		for (Background b : backgrounds) {
+			b.render();
+		}
+		
+		for (Star p : stars) {
 			p.render();
 		}
 		
@@ -206,6 +212,8 @@ public final class Scene {
 //		drawRect(bottom_right);
 //		drawRect(bottom);
 //		drawRect(bottom_left);
+		
+		GL11.glPopMatrix();
 	}
 
 	private void drawBottomWall() {
@@ -297,7 +305,11 @@ public final class Scene {
 			
 			EffectManager.getInstance().step();
 			
-			for (Star p : particles) {
+			for (Background b : backgrounds) {
+				b.step();
+			}
+			
+			for (Star p : stars) {
 				p.step();
 			}
 			
@@ -337,9 +349,14 @@ public final class Scene {
 			
 			// Spawn new particles
 			for (int i = 0; i < Config.STAR_DENSITY; i++) {
-				particles.add(new Star(Util.random(0, (int) Config.CLIENT_WIDTH), 0f, 
+				stars.add(new Star(Util.random(0, (int) Config.CLIENT_WIDTH), 0f, 
 													   Util.random((int) Config.STAR_MIN_SPEED, 
 															       (int) Config.STAR_MAX_SPEED)));
+			}
+			
+			// Spawn a new background?
+			if ((frameCounter % Config.BACKGROUND_DENSITY) == 0) {
+				backgrounds.add(BackgroundFactory.getRandomBackground());
 			}
 			
 			// Spawn new projectiles?
@@ -765,13 +782,23 @@ public final class Scene {
 			}
 		}
 				
-		// Remove excess particles
-		Iterator<Star> pi = particles.iterator();		
+		// Remove excess stars
+		Iterator<Star> pi = stars.iterator();		
 		while (pi.hasNext()) {
 			Star p = pi.next();
 			
 			if (p.getY() >= Config.SCREEN_HEIGHT) {
 				pi.remove();
+			}
+		}
+		
+		// Remove excess backgrounds
+		Iterator<Background> bgi = backgrounds.iterator();		
+		while (bgi.hasNext()) {
+			Background b = bgi.next();
+			
+			if (b.isDestroyed()) {
+				bgi.remove();
 			}
 		}
 		
@@ -911,7 +938,7 @@ public final class Scene {
 		switch (effect) {
 		case BRICK_EXPLOSION:		
 			particleEffects.add(new ParticleSystem(new SpriteTuple[]{new SpriteTuple("data/sprites/fire.png", 198.0f, 197.0f, 198, 197)}, 
-					x, y, 20.0f, 10.0f, 0.0f, 360.0f, 15.0f, 55.0f, 2.0f));
+					x, y, 20.0f, 10.0f, 0.0f, 360.0f, 0.0f, 15.0f, 55.0f, 2.0f));
 			break;
 			
 		case BALL_LOST:		
@@ -919,7 +946,7 @@ public final class Scene {
 //					  new SpriteTuple("data/sprites/Star2.png", 345.0f, 342.0f, 345, 342), 
 //					  new SpriteTuple("data/sprites/Star3.png", 270.0f, 261.0f, 270, 261), 
 //					  new SpriteTuple("data/sprites/Star4.png", 264.0f, 285.0f, 264, 285)}, 
-//			x, y, 150.0f, 5.0f, 0.0f, 180.0f, 15.0f, 15.0f, 5.0f));
+//			x, y, 150.0f, 5.0f, 0.0f, 180.0f, 0.0f, 15.0f, 15.0f, 5.0f));
 			break;
 		}
 	}

@@ -5,16 +5,19 @@ import org.newdawn.slick.geom.Rectangle;
 
 public class Particle extends GameObject {	
 	private float x, y, dx, dy, width, height, initialttl, ttl, size, sizeIncrease;
+	private float angularMomentum, angle;
 	private boolean destroyed = false;
 	
 	private Sprite sprite;
 	
-	public Particle(Sprite sprite, float x, float y, float dx, float dy, float ttl, float sizeIncrease) {
+	public Particle(Sprite sprite, float x, float y, float dx, float dy, float angularMomentum, float ttl, float sizeIncrease) {
 		this.x = x;
 		this.y = y;
 		
 		this.dx = dx;
 		this.dy = dy;
+		
+		this.angularMomentum = (float) Util.random((int) -angularMomentum, (int) +angularMomentum);
 
 		this.initialttl = ttl;
 		this.ttl = ttl;
@@ -22,17 +25,15 @@ public class Particle extends GameObject {
 		this.size = 1.0f;
 		this.sizeIncrease = sizeIncrease;
 		
+		this.angle = 0.0f;
+		
 		this.sprite = sprite;
 	}
 
 	@Override
 	public void render() {
-		GL11.glAlphaFunc(GL11.GL_GEQUAL, 0.0f);
-		GL11.glEnable(GL11.GL_ALPHA_TEST);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-		GL11.glEnable(GL11.GL_BLEND);
-        
 		sprite.setAlpha((ttl / initialttl) * 1.5f /* * (ttl / initialttl) */);
+		sprite.setAngle(angle);
 		sprite.render(x, y, width, height);
 	}
 
@@ -41,13 +42,14 @@ public class Particle extends GameObject {
 		if ((ttl -= 1.0f) <= 0)
 			setDestroyed(true);
 		
+		angle += angularMomentum;
 		size += sizeIncrease;
 		
 		x += dx;
 		y += dy;
 		
-		width  = 1.5f * (getAge() + 1.0f) + size;
-		height = 1.5f * (getAge() + 1.0f) + size;
+		width  = (getAge() + 1.0f) + size;
+		height = (getAge() + 1.0f) + size;
 		
 		sprite.step();
 	}

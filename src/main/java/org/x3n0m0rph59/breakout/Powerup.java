@@ -3,8 +3,6 @@ package org.x3n0m0rph59.breakout;
 import java.util.EnumMap;
 import java.util.Map;
 
-
-
 //import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.geom.Rectangle;
 //import org.x3n0m0rph59.breakout.Brick.Type;
@@ -20,7 +18,7 @@ public class Powerup extends GameObject {
 																	  new SpriteTuple("data/sprites/Star2.png", 345.0f, 342.0f, 345, 342), 
 																	  new SpriteTuple("data/sprites/Star3.png", 270.0f, 261.0f, 270, 261), 
 																	  new SpriteTuple("data/sprites/Star4.png", 264.0f, 285.0f, 264, 285)}, 
-														x, y, 0.0f, 10.0f, 0.0f, 360.0f, 95.0f, 150.0f, 2.5f);
+														x, y, 0.0f, 10.0f, 0.0f, 360.0f, 10.0f,  95.0f, 150.0f, 3.5f);
 	
 	public Powerup(float x, float y, EffectType type) {
 		this.x = x;

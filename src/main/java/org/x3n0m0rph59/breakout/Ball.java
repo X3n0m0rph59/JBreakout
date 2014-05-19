@@ -23,10 +23,10 @@ public class Ball extends GameObject {
 																	  new SpriteTuple("data/sprites/Star2.png", 345.0f, 342.0f, 345, 342), 
 																	  new SpriteTuple("data/sprites/Star3.png", 270.0f, 261.0f, 270, 261), 
 																	  new SpriteTuple("data/sprites/Star4.png", 264.0f, 285.0f, 264, 285)}, 
-															x, y, 0.0f, 5.0f, 0.0f, 45.0f, 15.0f, 15.0f, 5.0f);
+															x, y, 0.0f, 5.0f, 0.0f, 45.0f, 2.0f, 15.0f, 15.0f, 5.0f);
 	
 	private ParticleSystem fireBallTrail = new ParticleSystem(new SpriteTuple[]{new SpriteTuple("data/sprites/fire.png", 198.0f, 197.0f, 198, 197)}, 
-															x, y, 0.0f, 10.0f, 0.0f, 15.0f, 35.0f, 25.0f, 80.0f);
+															x, y, 0.0f, 10.0f, 0.0f, 25.0f, 2.0f, 25.0f, 25.0f, 25.0f);
 	
 	
 	public Ball(float x, float y) {
@@ -50,7 +50,9 @@ public class Ball extends GameObject {
 			fireBallTrail.render();
 			spriteFireBall.render(x, y);			
 		} else {
-			trail.render();
+			if (EffectManager.getInstance().isEffectActive(EffectType.STICKY_BALL))
+				trail.render();
+			
 			spriteNormalBall.render(x, y);
 		}
 				
@@ -83,11 +85,15 @@ public class Ball extends GameObject {
 		spriteNormalBall.step();
 		spriteFireBall.step();
 		
-		trail.setPosition(x, y, (float) Math.toRadians(getAngle()));
-		trail.step();
+		updateTrailPosition();
 		
-		fireBallTrail.setPosition(x, y, (float) Math.toRadians(getAngle()));
+		trail.step();
 		fireBallTrail.step();
+	}
+
+	private void updateTrailPosition() {
+		trail.setPosition(x, y, (float) Math.toRadians(getAngle() + 90.0f));
+		fireBallTrail.setPosition(x, y, (float) Math.toRadians(getAngle() + 90.0f));
 	}
 
 	@Override
@@ -98,23 +104,20 @@ public class Ball extends GameObject {
 	public void invertXVelocity() {
 		velX *= -1;
 		
-		trail.setPosition(x, y, (float) Math.toRadians(getAngle()));
-		fireBallTrail.setPosition(x, y, (float) Math.toRadians(getAngle()));
+		updateTrailPosition();
 	}
 
 	public void invertYVelocity() {
 		velY *= -1;
 		
-		trail.setPosition(x, y, (float) Math.toRadians(getAngle()));
-		fireBallTrail.setPosition(x, y, (float) Math.toRadians(getAngle()));
+		updateTrailPosition();
 	}
 
 	public void setPosition(float x, float y) {
 		this.x = x;
 		this.y = y;
 		
-		trail.setPosition(x, y, (float) Math.toRadians(getAngle()));
-		fireBallTrail.setPosition(x, y, (float) Math.toRadians(getAngle()));
+		updateTrailPosition();
 	}
 
 	public boolean isDestroyed() {
@@ -145,8 +148,7 @@ public class Ball extends GameObject {
 		this.x += dX;
 		this.y += dY;
 		
-		trail.setPosition(x, y, (float) Math.toRadians(getAngle()));
-		fireBallTrail.setPosition(x, y, (float) Math.toRadians(getAngle()));
+		updateTrailPosition();
 	}
 
 	public void changeSpeed(float v) {
@@ -156,8 +158,7 @@ public class Ball extends GameObject {
 		velX = (float) Math.cos(Math.toRadians(angle)) * speed;
 		velY = (float) Math.sin(Math.toRadians(angle)) * -speed;
 		
-		trail.setPosition(x, y, (float) Math.toRadians(getAngle()));
-		fireBallTrail.setPosition(x, y, (float) Math.toRadians(getAngle()));
+		updateTrailPosition();
 	}
 	
 	public void changeAngle(float delta) {
@@ -167,8 +168,7 @@ public class Ball extends GameObject {
 		velX = (float) Math.cos(Math.toRadians(angle)) * speed;
 		velY = (float) Math.sin(Math.toRadians(angle)) * -speed;
 		
-		trail.setPosition(x, y, (float) Math.toRadians(getAngle()));
-		fireBallTrail.setPosition(x, y, (float) Math.toRadians(getAngle()));
+		updateTrailPosition();
 	}
 
 	public boolean isMultiball() {
@@ -179,8 +179,7 @@ public class Ball extends GameObject {
 		velX = (float) Math.cos(Math.toRadians(angle)) * speed;
 		velY = (float) Math.sin(Math.toRadians(angle)) * -speed;
 		
-		trail.setPosition(x, y, (float) Math.toRadians(getAngle()));
-		fireBallTrail.setPosition(x, y, (float) Math.toRadians(getAngle()));
+		updateTrailPosition();
 	}
 
 	public float getAngle() {		
@@ -193,7 +192,6 @@ public class Ball extends GameObject {
 		velX = (float) Math.cos(Math.toRadians(angle)) * speed;
 		velY = (float) Math.sin(Math.toRadians(angle)) * -speed;
 		
-		trail.setPosition(x, y, (float) Math.toRadians(getAngle()));
-		fireBallTrail.setPosition(x, y, (float) Math.toRadians(getAngle()));
+		updateTrailPosition();
 	}
 }
