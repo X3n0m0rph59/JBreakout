@@ -27,10 +27,10 @@ enum EffectType {
 
 class Effect {
 	private EffectType type;
-	private int effectDuration;
+	private float effectDuration;
 	private boolean expired = false;
 	
-	public Effect(EffectType type, int effectDuration) {
+	public Effect(EffectType type, float effectDuration) {
 		this.type = type;
 		this.effectDuration = effectDuration;
 		
@@ -83,7 +83,7 @@ class Effect {
 		return type;
 	}
 
-	public int getEffectDuration() {
+	public float getEffectDuration() {
 		return effectDuration;
 	}
 

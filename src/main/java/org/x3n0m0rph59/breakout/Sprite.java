@@ -41,7 +41,8 @@ public class Sprite {
 				
 		Image img = spriteSheet.getSprite(frameCounter, 0);
 		img.setAlpha(alpha);
-						
+				
+		img.setCenterOfRotation((img.getWidth() - 1) / 16, (img.getHeight() - 1) / 16);
 		img.rotate(angle);
 		img.draw(x, y, width, height);
 		

@@ -33,12 +33,12 @@ public class BackgroundFactory {
 		}
 		
 		
-		final float width  = (float) Util.random(512, (int) Config.CLIENT_WIDTH);
-		final float height = (float) Util.random(512, (int) Config.SCREEN_HEIGHT);
+		final float width  = (float) Util.random(512, (int) Config.getInstance().getClientWidth());
+		final float height = (float) Util.random(512, (int) Config.getInstance().getScreenHeight());
 		final float speed  = (float) Util.random((int) Config.BACKGROUND_MIN_SPEED, 
 												 (int) Config.BACKGROUND_MAX_SPEED);
 		
-		return new Background(sprite, (float) Util.random(0, (int) Config.CLIENT_WIDTH - (int) width), 
+		return new Background(sprite, (float) Util.random(0, (int) Config.getInstance().getClientWidth() - (int) width), 
 							  -height, width, height, speed);
 	}
 }

@@ -87,7 +87,7 @@ class MusicStream {
 	
 	public void setPitch(float pitch) {
 		float pos = music.getPosition();
-		music.play(pitch, 1.0f);
+		music.loop(pitch, 1.0f);
 		music.setPosition(pos);
 	}
 }

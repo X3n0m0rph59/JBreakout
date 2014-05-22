@@ -1,16 +1,30 @@
 package org.x3n0m0rph59.breakout;
 
-
+/**
+ * The main class of JBreakout which holds the program entrypoint
+ * @author user
+ */
 public class App 
 {	
+	/** The one and only main window */
 	private static MainWindow mainWindow;
 	
-    public static void main( String[] args )
+	/**
+	 * Program entrypoint
+	 * @param args Command line arguments
+	 */
+    public static void main(String[] args)
     {
+    	Config.getInstance().parseCommandLine(args);
+    	
     	mainWindow = new MainWindow();    	
     	mainWindow.show();	
     }
 
+    /**
+	 * Returns the one and only main window
+	 * @return Reference to the main Window
+	 */
 	public static MainWindow getMainWindow() {
 		return mainWindow;
 	}

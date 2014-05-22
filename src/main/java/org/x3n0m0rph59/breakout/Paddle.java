@@ -11,10 +11,10 @@ public class Paddle extends GameObject {
 	private Sprite sprite = new Sprite("data/sprites/paddle.png", width, height, 600, 150);
 	
 	private ParticleSystem leftEngine = new ParticleSystem(new SpriteTuple[]{new SpriteTuple("data/sprites/fire.png", 198.0f, 197.0f, 198, 197)}, 
-			   x, y, 0.0f, 5.0f, 0.0f, 45.0f, 0.0f, 15.0f, 2.0f, 2.5f);
+			   x, y, 10.0f, 5.0f, 0.0f, 25.0f, 0.0f, 15.0f, 10.0f, 8.5f);
 	
 	private ParticleSystem rightEngine = new ParticleSystem(new SpriteTuple[]{new SpriteTuple("data/sprites/fire.png", 198.0f, 197.0f, 198, 197)}, 
-			   x, y, 0.0f, 5.0f, 0.0f, 45.0f, 0.0f, 15.0f, 2.0f, 2.5f);
+			   x, y, 10.0f, 5.0f, 0.0f, 25.0f, 0.0f, 15.0f, 10.0f, 8.5f);
 	
 	@Override
 	public void render() {
@@ -42,8 +42,8 @@ public class Paddle extends GameObject {
 		int new_x = Mouse.getX(), 
 			new_y = Mouse.getY();
 		
-		if (new_x > Config.CLIENT_WIDTH)
-			new_x = (int) (Config.CLIENT_WIDTH);
+		if (new_x > Config.getInstance().getClientWidth())
+			new_x = (int) (Config.getInstance().getClientWidth());
 		
 		Mouse.setCursorPosition(new_x, new_y);
 		
@@ -56,20 +56,20 @@ public class Paddle extends GameObject {
 	
 	public void setCenteredPosition(float x, float y) {
 		this.x = x - width / 2;		
-		this.y = Config.PADDLE_DEFAULT_Y;
+		this.y = Config.getInstance().getScreenHeight() - Config.PADDLE_BOTTOM_SPACING;
 				
 		if (this.x < 0) 
 			this.x = 0;
 		
-		if (this.x > Config.CLIENT_WIDTH - this.width) 
-			this.x = Config.CLIENT_WIDTH - this.width;
+		if (this.x > Config.getInstance().getClientWidth() - this.width) 
+			this.x = Config.getInstance().getClientWidth() - this.width;
 		
 		updateEnginePosition();
 	}
 
 	private void updateEnginePosition() {
-		leftEngine.setPosition(this.x + Config.PADDLE_ENGINE_OFFSET, (this.y + this.height), (float) Math.toRadians(180.0f - 90.0f));
-		rightEngine.setPosition((this.x + this.width) - Config.PADDLE_ENGINE_OFFSET, (this.y + this.height), (float) Math.toRadians(180.0f - 90.0f));
+		leftEngine.setPosition(this.x + Config.PADDLE_ENGINE_OFFSET, (this.y + this.height), (float) Math.toRadians(180.0f - 80.0f));
+		rightEngine.setPosition((this.x + this.width) - Config.PADDLE_ENGINE_OFFSET, (this.y + this.height), (float) Math.toRadians(180.0f - 80.0f));
 	}
 
 	@Override

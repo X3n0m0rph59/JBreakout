@@ -18,19 +18,21 @@ public class MainWindow {
 				
 		// Try to hide the cursor 
 		// not a problem if it fails
-		try {
-			Cursor emptyCursor = new Cursor(1, 1, 0, 0, 1, BufferUtils.createIntBuffer(1), null);
-			Mouse.setNativeCursor(emptyCursor);
-			
-			Mouse.setGrabbed(true);
-		} catch (LWJGLException e) {
-			e.printStackTrace();
-		}		
+		if (!Config.getInstance().isDebugging()) {
+			try {
+				Cursor emptyCursor = new Cursor(1, 1, 0, 0, 1, BufferUtils.createIntBuffer(1), null);
+				Mouse.setNativeCursor(emptyCursor);
+				
+				Mouse.setGrabbed(true);
+			} catch (LWJGLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public void show() {
 		scene = new Scene();
-		scene.setState(Scene.State.GREETING);
+		scene.setState(Scene.State.NEW_STAGE);
 		
 		while (!Display.isCloseRequested()) {									
 			scene.step();
@@ -46,21 +48,42 @@ public class MainWindow {
 	private void initOpenGL() {
 		try {
 			DisplayMode displayMode = null;
-			
-			if (Config.FULLSCREEN) {				
-		        DisplayMode[] modes = Display.getAvailableDisplayModes();
-	
-				for (int i = 0; i < modes.length; i++) {
-					 if (modes[i].getWidth() == Config.SCREEN_WIDTH && 
-					     modes[i].getHeight() == Config.SCREEN_HEIGHT && 
-					     modes[i].isFullscreenCapable()) {
-						 
-					        displayMode = modes[i];
-					 }
-				}
+
+			if (Config.getInstance().isDebugging()) {
+				displayMode = new DisplayMode(
+						(int) Config.FORCE_SCREEN_WIDTH,
+						(int) Config.FORCE_SCREEN_HEIGHT);
 			} else {
-				displayMode = new DisplayMode((int) Config.SCREEN_WIDTH, (int) Config.SCREEN_HEIGHT);
+				if (Config.FULLSCREEN) {
+					DisplayMode[] modes = Display.getAvailableDisplayModes();
+
+					// use largest fullscreen mode
+					int xres = 0, yres = 0;
+					for (int i = 0; i < modes.length; i++) {
+						if (modes[i].isFullscreenCapable()) {
+							if (modes[i].getWidth() > xres
+									&& modes[i].getHeight() > yres) {
+								displayMode = modes[i];
+
+								xres = displayMode.getWidth();
+								yres = displayMode.getHeight();
+							}
+						}
+					}
+
+				} else {
+					displayMode = new DisplayMode(
+							(int) Config.FORCE_SCREEN_WIDTH,
+							(int) Config.FORCE_SCREEN_HEIGHT);
+				}
 			}
+			
+			Config.getInstance().setScreenHeight(displayMode.getHeight());
+			Config.getInstance().setScreenWidth(displayMode.getWidth());
+
+			Logger.log("Using mode: "
+					+ (int) Config.getInstance().getScreenWidth() + "x"
+					+ (int) Config.getInstance().getScreenHeight());
 			
 			Display.setDisplayModeAndFullscreen(displayMode);	
 			Display.create();			
@@ -80,8 +103,8 @@ public class MainWindow {
 			
 			GL11.glMatrixMode(GL11.GL_PROJECTION);
 			GL11.glLoadIdentity();
-			GL11.glViewport(0, 0, (int) Config.SCREEN_WIDTH, (int) Config.SCREEN_HEIGHT);
-			GL11.glOrtho(0, (int) Config.SCREEN_WIDTH, (int) Config.SCREEN_HEIGHT, 0, 0, 128);					
+			GL11.glViewport(0, 0, (int) Config.getInstance().getScreenWidth(), (int) Config.getInstance().getScreenHeight());
+			GL11.glOrtho(0, (int) Config.getInstance().getScreenWidth(), (int) Config.getInstance().getScreenHeight(), 0, 0, 128);					
 			
 			GL11.glMatrixMode(GL11.GL_MODELVIEW);
 			GL11.glLoadIdentity();		

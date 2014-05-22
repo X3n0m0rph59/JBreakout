@@ -1,6 +1,5 @@
 package org.x3n0m0rph59.breakout;
 
-import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.geom.Rectangle;
 
 public class Particle extends GameObject {	

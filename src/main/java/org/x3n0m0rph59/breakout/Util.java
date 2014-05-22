@@ -4,6 +4,7 @@ import java.util.Random;
 
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Point;
+import org.newdawn.slick.geom.Shape;
 
 enum Edge {LEFT, TOP_LEFT, TOP, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT}
 
@@ -56,18 +57,11 @@ public final class Util {
 
 	public static int random(int min, int max) {
 		Random rnd = new Random();
-		return rnd.nextInt((max - min) + 1) + min;
+		return rnd.nextInt(Math.abs(max - min) + 1) + min;
 	}
 
-	public static int sign(float val) {
-		if (val == 0)
-			return 0;
-		else if (val > 0)
-			return 1;
-		else if (val < 0)
-			return -1;
-		
-		throw new RuntimeException("Invalid code reached");
+	public static int signum(float val) {
+		return (int) Math.signum(val);
 	}
 
 	public static int max(int p1, int p2) {
@@ -75,5 +69,14 @@ public final class Util {
 			return p1;
 		else
 			return p2;
+	}
+
+	public static Rectangle getBoundingBoxFromShape(Shape boundingShape) {
+		Rectangle boundingBox = new Rectangle(boundingShape.getMinX(), 
+											  boundingShape.getMinY(), 
+											  boundingShape.getMaxX() - boundingShape.getMinX(), 
+											  boundingShape.getMaxY() - boundingShape.getMinY());
+		
+		return boundingBox;
 	}
 }

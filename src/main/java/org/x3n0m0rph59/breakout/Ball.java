@@ -23,10 +23,10 @@ public class Ball extends GameObject {
 																	  new SpriteTuple("data/sprites/Star2.png", 345.0f, 342.0f, 345, 342), 
 																	  new SpriteTuple("data/sprites/Star3.png", 270.0f, 261.0f, 270, 261), 
 																	  new SpriteTuple("data/sprites/Star4.png", 264.0f, 285.0f, 264, 285)}, 
-															x, y, 0.0f, 5.0f, 0.0f, 45.0f, 2.0f, 15.0f, 15.0f, 5.0f);
+															x, y, 1.0f, 5.0f, 0.0f, 45.0f, 2.0f, 15.0f, 15.0f, 5.0f);
 	
 	private ParticleSystem fireBallTrail = new ParticleSystem(new SpriteTuple[]{new SpriteTuple("data/sprites/fire.png", 198.0f, 197.0f, 198, 197)}, 
-															x, y, 0.0f, 10.0f, 0.0f, 25.0f, 2.0f, 25.0f, 25.0f, 25.0f);
+															x, y, 1.0f, 25.0f, 0.0f, 25.0f, 2.0f, 15.0f, 25.0f, 25.0f);
 	
 	
 	public Ball(float x, float y) {
@@ -45,7 +45,7 @@ public class Ball extends GameObject {
 	}
 	
 	@Override
-	public void render() {
+	public void render() {		
 		if (EffectManager.getInstance().isEffectActive(EffectType.FIREBALL)) {
 			fireBallTrail.render();
 			spriteFireBall.render(x, y);			
@@ -134,6 +134,19 @@ public class Ball extends GameObject {
 	
 	public float getVelY() {
 		return velY;
+	}
+
+	public float getSpeed() {
+		return speed;
+	}
+
+	public void setSpeed(float speed) {
+		this.speed = speed;
+		
+		velX = (float) Math.cos(Math.toRadians(getAngle())) * speed;
+		velY = (float) Math.sin(Math.toRadians(getAngle())) * -speed;
+		
+		updateTrailPosition();
 	}
 
 	public State getState() {
