@@ -45,11 +45,11 @@ public class Brick extends GameObject {
 		this.width = width;
 		this.height = height;
 		
-		sprites.put(Type.NORMAL, new Sprite("data/sprites/brick_normal.png", 255, 159, 255, 159));
-		sprites.put(Type.WEAK, new Sprite("data/sprites/brick_weak.png", 255, 159, 255, 159));
-		sprites.put(Type.HARD, new Sprite("data/sprites/brick_hard.png", 255, 159, 255, 159));
-		sprites.put(Type.SOLID, new Sprite("data/sprites/brick_solid.png", 255, 159, 255, 159));
-		sprites.put(Type.POWERUP, new Sprite("data/sprites/brick_powerup.png", 255, 159, 255, 159));
+		sprites.put(Type.NORMAL, new Sprite("sprites/brick_normal.png", 255, 159, 255, 159));
+		sprites.put(Type.WEAK, new Sprite("sprites/brick_weak.png", 255, 159, 255, 159));
+		sprites.put(Type.HARD, new Sprite("sprites/brick_hard.png", 255, 159, 255, 159));
+		sprites.put(Type.SOLID, new Sprite("sprites/brick_solid.png", 255, 159, 255, 159));
+		sprites.put(Type.POWERUP, new Sprite("sprites/brick_powerup.png", 255, 159, 255, 159));
 	}
 	
 	@Override

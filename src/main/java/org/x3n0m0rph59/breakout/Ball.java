@@ -14,18 +14,18 @@ public class Ball extends GameObject {
 	private boolean multiball = false;
 	private boolean destroyed = false;
 	
-	private Sprite spriteNormalBall = new Sprite("data/sprites/ball.png", Config.BALL_RADIUS * 2, 
+	private Sprite spriteNormalBall = new Sprite("sprites/ball.png", Config.BALL_RADIUS * 2, 
 												Config.BALL_RADIUS * 2, 200, 200);
-	private Sprite spriteFireBall = new Sprite("data/sprites/fireball.png", Config.BALL_RADIUS * 2, 
+	private Sprite spriteFireBall = new Sprite("sprites/fireball.png", Config.BALL_RADIUS * 2, 
 												Config.BALL_RADIUS * 2, 200, 200);
 	
-	private ParticleSystem trail = new ParticleSystem(new SpriteTuple[]{new SpriteTuple("data/sprites/Star1.png", 255.0f, 255.0f, 255, 255), 
-																	  new SpriteTuple("data/sprites/Star2.png", 345.0f, 342.0f, 345, 342), 
-																	  new SpriteTuple("data/sprites/Star3.png", 270.0f, 261.0f, 270, 261), 
-																	  new SpriteTuple("data/sprites/Star4.png", 264.0f, 285.0f, 264, 285)}, 
+	private ParticleSystem trail = new ParticleSystem(new SpriteTuple[]{new SpriteTuple("sprites/Star1.png", 255.0f, 255.0f, 255, 255), 
+																	  new SpriteTuple("sprites/Star2.png", 345.0f, 342.0f, 345, 342), 
+																	  new SpriteTuple("sprites/Star3.png", 270.0f, 261.0f, 270, 261), 
+																	  new SpriteTuple("sprites/Star4.png", 264.0f, 285.0f, 264, 285)}, 
 															x, y, 1.0f, 5.0f, 0.0f, 45.0f, 2.0f, 15.0f, 15.0f, 5.0f);
 	
-	private ParticleSystem fireBallTrail = new ParticleSystem(new SpriteTuple[]{new SpriteTuple("data/sprites/fire.png", 198.0f, 197.0f, 198, 197)}, 
+	private ParticleSystem fireBallTrail = new ParticleSystem(new SpriteTuple[]{new SpriteTuple("sprites/fire.png", 198.0f, 197.0f, 198, 197)}, 
 															x, y, 1.0f, 25.0f, 0.0f, 25.0f, 2.0f, 15.0f, 25.0f, 25.0f);
 	
 	

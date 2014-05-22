@@ -1,8 +1,9 @@
 package org.x3n0m0rph59.breakout;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -13,13 +14,12 @@ public class LevelLoader {
 	
 	public static HashMap<String, String> getLevelMetaData(int level) {
 		HashMap<String, String> data = new HashMap<>();
-
-		FileReader file = null;
+		
 		BufferedReader reader = null;
 		
 		try {			
-			file = new FileReader("./data/levels/level" + String.format("%02d", level) + ".lvl");
-			reader = new BufferedReader(file);
+			InputStream in = LevelLoader.class.getClassLoader().getResourceAsStream("levels/level" + String.format("%02d", level) + ".lvl");			
+			reader = new BufferedReader(new InputStreamReader(in));			
 
 			String line;
 			
@@ -58,7 +58,6 @@ public class LevelLoader {
 		finally {
 			try {
 				reader.close();
-				file.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}			
@@ -70,12 +69,11 @@ public class LevelLoader {
 	public static List<Brick> loadLevel(int level) {
 		List<Brick> bricks = new ArrayList<Brick>();
 		
-		FileReader file = null;
 		BufferedReader reader = null;
 		
 		try {			
-			file = new FileReader("./data/levels/level" + String.format("%02d", level) + ".lvl");
-			reader = new BufferedReader(file);
+			InputStream in = LevelLoader.class.getClassLoader().getResourceAsStream("levels/level" + String.format("%02d", level) + ".lvl");			
+			reader = new BufferedReader(new InputStreamReader(in));			
 
 			String line;
 			int lindex = 0, cindex = 0;						
@@ -243,7 +241,6 @@ public class LevelLoader {
 		finally {
 			try {
 				reader.close();
-				file.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}			

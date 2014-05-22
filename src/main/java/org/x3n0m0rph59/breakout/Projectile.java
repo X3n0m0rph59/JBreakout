@@ -9,7 +9,7 @@ public class Projectile extends GameObject {
 	
 	private boolean destroyed = false;
 	
-	private Sprite sprite = new Sprite("data/sprites/projectile.png", 50, 100, 50, 100);
+	private Sprite sprite = new Sprite("sprites/projectile.png", 50, 100, 50, 100);
 	
 	public Projectile(float x, float y) {
 		this.x = x;

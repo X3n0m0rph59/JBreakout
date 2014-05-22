@@ -32,7 +32,7 @@ class SoundSprite {
 	
 	public SoundSprite(String filename) {
 		try {
-			sound = new Sound("data/sounds/" + filename);
+			sound = new Sound("sounds/" + filename);
 		} catch (SlickException e) {		
 			e.printStackTrace();
 		}
@@ -61,7 +61,7 @@ class MusicStream {
 	
 	public MusicStream(String filename) {
 		try {
-			music = new Music("data/music/" + filename, false);
+			music = new Music("music/" + filename, false);
 		} catch (SlickException e) {
 			e.printStackTrace();
 		}

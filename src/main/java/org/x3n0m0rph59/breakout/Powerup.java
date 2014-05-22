@@ -14,10 +14,10 @@ public class Powerup extends GameObject {
 	
 	private Map<EffectType, Sprite> sprites = new EnumMap<>(EffectType.class);
 	
-	private ParticleSystem trail = new ParticleSystem(new SpriteTuple[]{new SpriteTuple("data/sprites/Star1.png", 255.0f, 255.0f, 255, 255), 
-																	  new SpriteTuple("data/sprites/Star2.png", 345.0f, 342.0f, 345, 342), 
-																	  new SpriteTuple("data/sprites/Star3.png", 270.0f, 261.0f, 270, 261), 
-																	  new SpriteTuple("data/sprites/Star4.png", 264.0f, 285.0f, 264, 285)}, 
+	private ParticleSystem trail = new ParticleSystem(new SpriteTuple[]{new SpriteTuple("sprites/Star1.png", 255.0f, 255.0f, 255, 255), 
+																	  new SpriteTuple("sprites/Star2.png", 345.0f, 342.0f, 345, 342), 
+																	  new SpriteTuple("sprites/Star3.png", 270.0f, 261.0f, 270, 261), 
+																	  new SpriteTuple("sprites/Star4.png", 264.0f, 285.0f, 264, 285)}, 
 														x, y, 0.0f, 10.0f, 0.0f, 360.0f, 10.0f,  95.0f, 150.0f, 3.5f);
 	
 	public Powerup(float x, float y, EffectType type) {
@@ -26,19 +26,19 @@ public class Powerup extends GameObject {
 		
 		this.type = type;
 		
-		sprites.put(EffectType.BOTTOM_WALL, new Sprite("data/sprites/powerup_bottom_wall.png", 100, 100, 100, 100));
-		sprites.put(EffectType.PADDLE_GUN, new Sprite("data/sprites/powerup_paddle_gun.png", 100, 100, 100, 100));
+		sprites.put(EffectType.BOTTOM_WALL, new Sprite("sprites/powerup_bottom_wall.png", 100, 100, 100, 100));
+		sprites.put(EffectType.PADDLE_GUN, new Sprite("sprites/powerup_paddle_gun.png", 100, 100, 100, 100));
 		
-		sprites.put(EffectType.SHRINK_PADDLE, new Sprite("data/sprites/powerup_shrink.png", 100, 100, 100, 100));
-		sprites.put(EffectType.ENLARGE_PADDLE, new Sprite("data/sprites/powerup_enlarge.png", 100, 100, 100, 100));
+		sprites.put(EffectType.SHRINK_PADDLE, new Sprite("sprites/powerup_shrink.png", 100, 100, 100, 100));
+		sprites.put(EffectType.ENLARGE_PADDLE, new Sprite("sprites/powerup_enlarge.png", 100, 100, 100, 100));
 		
-		sprites.put(EffectType.FIREBALL, new Sprite("data/sprites/powerup_fireball.png", 100, 100, 100, 100));
-		sprites.put(EffectType.MULTIBALL, new Sprite("data/sprites/powerup_multiball.png", 100, 100, 100, 100));						
+		sprites.put(EffectType.FIREBALL, new Sprite("sprites/powerup_fireball.png", 100, 100, 100, 100));
+		sprites.put(EffectType.MULTIBALL, new Sprite("sprites/powerup_multiball.png", 100, 100, 100, 100));						
 		
-		sprites.put(EffectType.SLOW_DOWN, new Sprite("data/sprites/powerup_slow_down.png", 100, 100, 100, 100));
-		sprites.put(EffectType.SPEED_UP, new Sprite("data/sprites/powerup_speed_up.png", 100, 100, 100, 100));
+		sprites.put(EffectType.SLOW_DOWN, new Sprite("sprites/powerup_slow_down.png", 100, 100, 100, 100));
+		sprites.put(EffectType.SPEED_UP, new Sprite("sprites/powerup_speed_up.png", 100, 100, 100, 100));
 		
-		sprites.put(EffectType.STICKY_BALL, new Sprite("data/sprites/powerup_sticky_ball.png", 100, 100, 100, 100));
+		sprites.put(EffectType.STICKY_BALL, new Sprite("sprites/powerup_sticky_ball.png", 100, 100, 100, 100));
 	}
 	
 	@Override

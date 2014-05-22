@@ -8,12 +8,12 @@ public class Paddle extends GameObject {
 	private float x, y, width = Config.PADDLE_DEFAULT_WIDTH, height = Config.PADDLE_HEIGHT;	
 	private float lastX = 0, lastY = 0;
 	
-	private Sprite sprite = new Sprite("data/sprites/paddle.png", width, height, 600, 150);
+	private Sprite sprite = new Sprite("sprites/paddle.png", width, height, 600, 150);
 	
-	private ParticleSystem leftEngine = new ParticleSystem(new SpriteTuple[]{new SpriteTuple("data/sprites/fire.png", 198.0f, 197.0f, 198, 197)}, 
+	private ParticleSystem leftEngine = new ParticleSystem(new SpriteTuple[]{new SpriteTuple("sprites/fire.png", 198.0f, 197.0f, 198, 197)}, 
 			   x, y, 10.0f, 5.0f, 0.0f, 25.0f, 0.0f, 15.0f, 10.0f, 8.5f);
 	
-	private ParticleSystem rightEngine = new ParticleSystem(new SpriteTuple[]{new SpriteTuple("data/sprites/fire.png", 198.0f, 197.0f, 198, 197)}, 
+	private ParticleSystem rightEngine = new ParticleSystem(new SpriteTuple[]{new SpriteTuple("sprites/fire.png", 198.0f, 197.0f, 198, 197)}, 
 			   x, y, 10.0f, 5.0f, 0.0f, 25.0f, 0.0f, 15.0f, 10.0f, 8.5f);
 	
 	@Override
