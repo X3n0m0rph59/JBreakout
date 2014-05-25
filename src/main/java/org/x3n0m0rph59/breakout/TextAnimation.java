@@ -5,16 +5,16 @@ import java.awt.Font;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.TrueTypeFont;
-import org.newdawn.slick.geom.Rectangle;
 
-public class TextAnimation extends GameObject {	
+public class TextAnimation implements Renderable, Stepable, Destroyable {
 	private String text;
-	private float x,y;
-	private Color color = new Color(1.0f, 0.8f, 0.8f, 1.0f);
-	private boolean destroyed;
+	private Color color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
 	
 	private TrueTypeFont font;
+	
 	private int frameCounter = 0;
+	private boolean destroyed = false;
+	
 	
 	public TextAnimation(String text) {
 		this.text = text;
@@ -44,33 +44,12 @@ public class TextAnimation extends GameObject {
 		}
 	}
 
-	@Override
-	public Rectangle getBoundingBox() {
-		return null;
-	}
-
 	public String getText() {
 		return text;
 	}
 
 	public void setText(String text) {
 		this.text = text;
-	}
-
-	public float getX() {
-		return x;
-	}
-
-	public void setX(float x) {
-		this.x = x;
-	}
-
-	public float getY() {
-		return y;
-	}
-
-	public void setY(float y) {
-		this.y = y;
 	}
 
 	public Color getColor() {

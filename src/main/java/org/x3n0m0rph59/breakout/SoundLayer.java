@@ -18,6 +18,9 @@ enum Sounds {
 	POWERUP_SPAWNED,	
 	BRICK_DESTROYED,
 	BULLET_FIRED,
+	GRAPPLING_HOOK_LOOP,
+	SPACEBOMB_LAUNCH,
+	SPACEBOMB_EXPLOSION,
 	QUIT
 }
 
@@ -40,6 +43,10 @@ class SoundSprite {
 	
 	public void play(float pitch, float volume) {
 		sound.play(pitch, volume);
+	}
+	
+	public void loop(float pitch, float volume) {
+		sound.loop();
 	}
 	
 	public void playAt(float pitch, float volume, float x, float y, float z) {
@@ -118,6 +125,9 @@ public final class SoundLayer {
 		soundMap.put(Sounds.POWERUP_SPAWNED, new SoundSprite("powerup_spawned.ogg"));
 		soundMap.put(Sounds.BRICK_DESTROYED, new SoundSprite("brick_destroyed.ogg"));
 		soundMap.put(Sounds.BULLET_FIRED, new SoundSprite("bullet_fired.ogg"));
+		soundMap.put(Sounds.GRAPPLING_HOOK_LOOP, new SoundSprite("grappling_hook.ogg"));
+		soundMap.put(Sounds.SPACEBOMB_LAUNCH, new SoundSprite("spacebomb_launch.ogg"));
+		soundMap.put(Sounds.SPACEBOMB_EXPLOSION, new SoundSprite("spacebomb_explosion.ogg"));
 		soundMap.put(Sounds.QUIT, new SoundSprite("quit.ogg"));
 	}
 	
@@ -126,23 +136,40 @@ public final class SoundLayer {
 	}
 
 	public static void playSound(Sounds sound) {
-		playSound(sound, 1.0f, 1.0f);
+		playSound(sound, 1.0f, 1.0f, false);
 	}
 	
-	public static void playSound(Sounds sound, float pitch, float gain) {
-		Logger.log("Playing sound: " + sound);
+	public static void loopSound(Sounds sound) {
+		playSound(sound, 1.0f, 1.0f, true);
+	}
+	
+	public static void stopLoop(Sounds sound) {
+		Logger.log("Stopping sound: " + sound, 2);
+		
+		SoundSprite s = SoundLayer.getInstance().soundMap.get(sound);
+		if (s != null)
+			s.stop();
+	}
+	
+	public static void playSound(Sounds sound, float pitch, float gain, boolean loop) {
+		Logger.log("Playing sound: " + sound, 2);
 		
 		SoundSprite s = SoundLayer.getInstance().soundMap.get(sound);
 		if (s != null) 
-			s.play(pitch, gain);			
+			if (loop)
+				s.loop(pitch, gain);
+			else
+				s.play(pitch, gain);			
 	}
 	
 	public static void playMusic(Musics music) {
-		Logger.log("Playing music: " + music);
+		Logger.log("Playing music: " + music, 2);
 		
-		MusicStream m = SoundLayer.getInstance().musicMap.get(music);
-		if (m != null) 
-			m.play();
+		if (!Config.getInstance().isMusicMuted()) {
+			MusicStream m = SoundLayer.getInstance().musicMap.get(music);
+			if (m != null) 
+				m.play();
+		}
 	}
 	
 	public void fadeMusic(Musics music) {

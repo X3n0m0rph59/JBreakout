@@ -49,6 +49,9 @@ public final class Config {
 	/** Initial number of lives left */
 	public static final int INITIAL_BALLS_LEFT = 4;
 	
+	/** Initial number of Space Bombs left */
+	public static final int INITIAL_SPACEBOMBS_LEFT = 1;
+	
 	/** Default ball speed */
 	public static final float BALL_SPEED = 8.0f;
 	
@@ -76,7 +79,7 @@ public final class Config {
 	public static final float BACKGROUND_MIN_SPEED = 1.0f;
 	
 	/** Upper end of the range of randomized scroll speeds for background sprites */
-	public static final float BACKGROUND_MAX_SPEED = 4.0f;
+	public static final float BACKGROUND_MAX_SPEED = 2.0f;
 	
 	/** Density of background sprites (the lower the value the more backgrounds are generated per time unit) */
 	public static final int BACKGROUND_DENSITY = 400;
@@ -129,18 +132,31 @@ public final class Config {
 	public static final float PADDLE_ENGINE_OFFSET = 5.0f;
 	
 	public static final int STAR_DENSITY = 2;
-	public static final float STAR_WIDTH = 2.5f;
-	public static final float STAR_HEIGHT = 2.5f;
+	public static final float STAR_WIDTH = 3.5f;
+	public static final float STAR_HEIGHT = 3.5f;
 	public static final float STAR_MIN_SPEED = 5.0f;
 	public static final float STAR_MAX_SPEED = 20.0f;
 	
 	public static final float POWERUP_WIDTH = 50.0f;
 	public static final float POWERUP_HEIGHT = 50.0f;
+	public static final float POWERUP_SPEED = 10f;
 	
 	public static final float PROJECTILE_WIDTH = 7.0f;
 	public static final float PROJECTILE_HEIGHT = 18.0f;
-	public static final float PROJECTILE_SPEED = 12.0f;
+	public static final float PROJECTILE_SPEED = 17.0f;
 	public static final int PROJECTILE_FIRE_RATE = 4;
+	
+	public static final float SPACEBOMB_WIDTH = 100.0f;
+	public static final float SPACEBOMB_HEIGHT = 100.0f;
+	public static final float SPACEBOMB_SPEED = 3.5f;
+	public static final float SPACEBOMB_LURKING_SPEED = 1.5f;
+	public static final float SPACEBOMB_EXPLOSION_DURATION = 4.5f;
+	public static final float SPACEBOMB_EXPLOSION_RADIUS = 250.0f;
+	public static final int SPACEBOMB_DENSITY = SYNC_FPS * 25;
+	
+	public static final float GRAPPLING_HOOK_EXTEND_SPEED = 10.0f;
+	public static final float GRAPPLING_HOOK_LOWER_SPEED = GRAPPLING_HOOK_EXTEND_SPEED;
+	public static final float GRAPPLING_HOOK_LENGTH = 350.0f;
 	
 	public static final float BOTTOM_WALL_HEIGHT = 15.0f;	
 	public static final float BOTTOM_WALL_SEGMENT_WIDTH = 45.0f;
@@ -155,7 +171,8 @@ public final class Config {
 	
 	private float speedFactor = 1.0f;
 
-	private boolean debugging;
+	private boolean debugging, windowed, noMusic;
+	private int verbosityLevel, requestedXres = 0, requestedYres = 0;
 	
 	public Config() {
 		
@@ -169,12 +186,51 @@ public final class Config {
 		ArgumentParser parser = ArgumentParsers.newArgumentParser(Config.APP_NAME).
 								description("Java and OpenGL based Breakout Game");
 
-		parser.addArgument("--debug").type(Boolean.class).action(Arguments.storeTrue()).help("Set the debugging flag");
+		parser.addArgument("--debug")
+			  .type(Boolean.class)
+			  .action(Arguments.storeTrue())
+			  .help("Set the debugging flag");
+		
+		parser.addArgument("--verbose", "-v")
+			  .type(Integer.class)
+			  .action(Arguments.count())
+			  .setDefault(0).help("Set the logging verbosity");
+		
+		parser.addArgument("--windowed")
+			  .type(Boolean.class)
+			  .action(Arguments.storeTrue())
+			  .help("Don't attempt to switch to a fullscreen video mode");
+		
+		parser.addArgument("--resolution", "-r")
+		  .type(String.class)
+		  .action(Arguments.store())
+		  .help("Don't attempt to switch to a fullscreen video mode");
+		
+		parser.addArgument("--nomusic")
+		  .type(Boolean.class)
+		  .action(Arguments.storeTrue())
+		  .help("Don't play background music");
 		
 		try {
 			Namespace namespace = parser.parseArgs(args);
 			
 			this.debugging = namespace.getBoolean("debug");
+			this.verbosityLevel = namespace.getInt("verbose");
+			this.windowed = namespace.getBoolean("windowed");
+			
+			String res = namespace.getString("resolution");
+			
+			if (res != null) {
+				if (res.trim().matches("\\d+(x|X)\\d+")) {
+					this.requestedXres = Integer.parseInt(res.split("(x|X)")[0]);
+					this.requestedYres = Integer.parseInt(res.split("(x|X)")[1]);
+				} else {
+					System.err.println("Invalid resolution parameter");
+					System.exit(1);
+				}
+			}
+			
+			this.noMusic = namespace.getBoolean("nomusic");
 			
 		} catch (ArgumentParserException e) {
 			e.printStackTrace();
@@ -235,5 +291,33 @@ public final class Config {
 
 	public boolean isDebugging() {		
 		return debugging;
+	}
+
+	public boolean isVerbose() {		
+		return getVerbosityLevel() > 0;
+	}
+	
+	public int getVerbosityLevel() {	
+		return verbosityLevel;
+	}
+	
+	public boolean isWindowed() {		
+		return windowed;
+	}
+
+	public int getRequestedXres() {
+		return requestedXres;
+	}
+	
+	public boolean isMusicMuted() {		
+		return noMusic;
+	}
+
+	public int getRequestedYres() {
+		return requestedYres;
+	}
+
+	public boolean useUserSpecifiedVideoMode() {
+		return requestedXres > 0 && requestedYres > 0;
 	}
 }

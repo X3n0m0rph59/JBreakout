@@ -4,140 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-enum EffectType {
-					// Special effects/abilities
-					FIREBALL,
-					MULTIBALL,
-					ENLARGE_PADDLE, 
-					SHRINK_PADDLE, 
-					BOTTOM_WALL, 
-					PADDLE_GUN,
-					STICKY_BALL,
-					SPEED_UP,
-					SLOW_DOWN,
-					
-					// Bonuses
-					// NEW_BALL,
-					// SCORE_BOOST,
-					
-					// TODO:
-					// 2d movement of paddle
-					// multi paddle
-				};
-
-class Effect {
-	private EffectType type;
-	private float effectDuration;
-	private boolean expired = false;
-	
-	public Effect(EffectType type, float effectDuration) {
-		this.type = type;
-		this.effectDuration = effectDuration;
-		
-		// Apply effect (if applicable)
-		switch (type) {		
-		case ENLARGE_PADDLE:
-			App.getMainWindow().getScene().getPaddle().expand();
-			break;		
-		
-		case MULTIBALL:
-			App.getMainWindow().getScene().spawnBall(true);
-			break;
-			
-		case BOTTOM_WALL:
-			break;
-			
-		case FIREBALL:
-			break;
-			
-		case PADDLE_GUN:
-			break;
-			
-		case SHRINK_PADDLE:
-			App.getMainWindow().getScene().getPaddle().shrink();
-			break;
-			
-		case STICKY_BALL:
-			break;
-			
-		case SPEED_UP:
-			Config.getInstance().increaseGameSpeed(Config.POWERUP_SPEEDUP_FACTOR);			
-			break;
-			
-		case SLOW_DOWN:
-			Config.getInstance().decreaseGameSpeed(Config.POWERUP_SLOWDOWN_FACTOR);
-			break;
-			
-		default:
-			throw new RuntimeException("Unsupported EffectType: " + type);
-		}
-	}
-	
-	public void step() {
-		if (--effectDuration <= 0) {
-			expire();
-		}		
-	}
-	
-	public EffectType getType() {
-		return type;
-	}
-
-	public float getEffectDuration() {
-		return effectDuration;
-	}
-
-	public void setEffectDuration(int effectDuration) {
-		this.effectDuration = effectDuration;
-	}
-
-	public boolean isExpired() {
-		return expired;
-	}
-
-	public void expire() {
-		this.expired = true;
-		
-		Logger.log("Expired effect: " + this.type);
-		
-		// Un-apply effect
-		switch (type) {
-		case BOTTOM_WALL:
-			break;
-			
-		case ENLARGE_PADDLE:
-			App.getMainWindow().getScene().getPaddle().shrink();
-			break;
-			
-		case FIREBALL:
-			break;
-			
-		case MULTIBALL:
-			break;
-			
-		case PADDLE_GUN:
-			break;
-			
-		case SHRINK_PADDLE:
-			break;
-			
-		case STICKY_BALL:
-			break;
-			
-		case SPEED_UP:
-			Config.getInstance().decreaseGameSpeed(Config.POWERUP_SPEEDUP_FACTOR);
-			break;
-			
-		case SLOW_DOWN:
-			Config.getInstance().increaseGameSpeed(Config.POWERUP_SLOWDOWN_FACTOR);			
-			break;
-			
-		default:
-			throw new RuntimeException("Unsupported EffectType: " + type);		
-		}
-	}
-}
-
 public final class EffectManager {
 	private static final EffectManager instance = new EffectManager();	
 	private List<Effect> effectList = new ArrayList<Effect>();
@@ -190,7 +56,7 @@ public final class EffectManager {
 			throw new RuntimeException("Unsupported type: " + type);		
 		}
 				
-		Logger.log("New active effect: " + type);
+		Logger.log("New active effect: " + type, 1);
 	}
 	
 	public void expireEffect(Effect e) {		
@@ -234,7 +100,7 @@ public final class EffectManager {
 			throw new RuntimeException("Unsupported type: " + e.getType());		
 		}
 		
-		Logger.log("Effect expired: " + e.getType());
+		Logger.log("Effect expired: " + e.getType(), 1);
 	}
 	
 	public boolean isEffectActive(EffectType effect) {

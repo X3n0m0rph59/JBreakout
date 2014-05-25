@@ -5,8 +5,7 @@ public class SpriteTuple {
 	private float width, height;
 	private int tw, th;
 
-	public SpriteTuple(String fileName, float width, float height, int tw,
-			int th) {
+	public SpriteTuple(String fileName, float width, float height, int tw, int th) {
 		this.fileName = fileName;
 		this.width = width;
 		this.height = height;

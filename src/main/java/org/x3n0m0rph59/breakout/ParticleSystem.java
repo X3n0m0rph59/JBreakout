@@ -1,48 +1,44 @@
 package org.x3n0m0rph59.breakout;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.newdawn.slick.geom.Rectangle;
+public class ParticleSystem extends GameObject {
+	private final float initialLifeTime;
+	private float lifeTime, particleDensity, angularDeviation, 
+				  ttl, particleSpeed, sizeFactor;
+	
+	private final List<Particle> particles = new LinkedList<>();	
+	private final List<Sprite> spriteList = new ArrayList<>();
 
-public class ParticleSystem extends GameObject {	
-	private float x, y, lifeTime, particleDensity, angle, 
-				  angularDeviation, angularMomentum, 
-				  ttl, speed, sizeFactor;
-	
-	private int frameCounter = 0;	
-	
-	private boolean destroyed = false;
-	
-	private List<Particle> particles = new LinkedList<>();	
-	private List<Sprite> spriteList = new LinkedList<>();
-
-	public ParticleSystem(SpriteTuple[] sprites, float x, float y, float lifeTime, float particleDensity, 
-						  float angle, float angularDeviation, float angularMomentum, float ttl, float speed, 
+	public ParticleSystem(final SpriteTuple[] sprites, Point position, float lifeTime, float particleDensity, 
+						  float angleInDegrees, float angularDeviation, float angularVelocity, float ttl, float particleSpeed, 
 						  float sizeFactor) {
-		this.x = x;
-		this.y = y;
 		
+		super(null, position, 0.0f, 0.0f, angleInDegrees, angularVelocity, 0.0f, 0.0f);
+		
+		this.position = position;
+		this.angleInDegrees = angleInDegrees;
+		this.angularVelocity = angularVelocity;
+		
+		this.initialLifeTime = lifeTime;
 		this.lifeTime = lifeTime;
 		
 		this.particleDensity = particleDensity; 
-		
-		this.angle = angle;
-		this.angularDeviation = angularDeviation;
-		
-		this.angularMomentum = angularMomentum;
+		this.angularDeviation = angularDeviation;		
 		
 		this.ttl = ttl;
 		
-		this.speed = speed;
+		this.particleSpeed = particleSpeed;
 		
 		this.sizeFactor = sizeFactor;
 		
 		loadSprites(sprites);
 	}
 		
-	private void loadSprites(SpriteTuple[] sprites) {		
+	private void loadSprites(final SpriteTuple[] sprites) {		
 		for (SpriteTuple st : sprites) {
 			spriteList.add(new Sprite(st.getFileName(), st.getWidth(), st.getHeight(), st.getTw(), st.getTh()));
 		}			
@@ -57,72 +53,32 @@ public class ParticleSystem extends GameObject {
 	@Override
 	public void step() {
 		lifeTime -= 1.0f;
-		if (lifeTime <= 0.0f)
+		if (initialLifeTime >= 0.0f && lifeTime <= 0.0f) {
 			setDestroyed(true);
-		
-		if ((frameCounter++ % 1) == 0)
+		} else {		
 			for (int i = 0; i < (int) particleDensity; i++)
 				addNewParticle();
-		
-		Iterator<Particle> pi = particles.iterator();
-		while (pi.hasNext()) {
-			Particle p = pi.next();
-			p.step();
 			
-			if (p.isDestroyed())
-				pi.remove();
+			Iterator<Particle> pi = particles.iterator();
+			while (pi.hasNext()) {
+				Particle p = pi.next();
+				p.step();
+				
+				if (p.isDestroyed())
+					pi.remove();
+			}
 		}
-	}
-
-	@Override
-	public Rectangle getBoundingBox() {
-		return null;
 	}
 	
 	private void addNewParticle() {
 		final float angularDeviation = (float) Util.random(0, (int) this.angularDeviation);
 
-		final float speed = Util.random((int) 1.0f, (int) this.speed);
-		
-		final float dx = ((float) Math.cos((angle + Math.toRadians(90)) + Math.toRadians(angularDeviation)) * speed);
-		final float dy = ((float) Math.sin((angle - Math.toRadians(90)) + Math.toRadians(angularDeviation)) * speed);
-		
-		final float ttl = (float) Util.random(0, (int) this.ttl);
+		final float speed = Util.random((int) 1.0f, (int) this.particleSpeed);		
+		final int 	ttl = Util.random(0, (int) this.ttl);
 		
 		Sprite sprite = spriteList.get(Util.random(0, spriteList.size() - 1));
 															  
-		particles.add(new Particle(sprite, this.x, this.y, dx, dy, angularMomentum, ttl, this.sizeFactor));
-	}
-	
-	public void setPosition(float x, float y, float angle) {
-		this.x = x;
-		this.y = y;
-		
-		this.angle = angle;
-	}
-
-	public float getX() {
-		return x;
-	}
-
-	public void setX(float x) {
-		this.x = x;
-	}
-
-	public float getY() {
-		return y;
-	}
-
-	public void setY(float y) {
-		this.y = y;
-	}
-
-	public float getAngle() {
-		return angle;
-	}
-
-	public void setAngle(float angle) {
-		this.angle = angle;
+		particles.add(new Particle(sprite, position, angleInDegrees, angularDeviation, speed, angularVelocity, ttl, this.sizeFactor));
 	}
 
 	public float getParticleDensity() {
@@ -149,12 +105,12 @@ public class ParticleSystem extends GameObject {
 		this.ttl = ttl;
 	}
 
-	public float getSpeed() {
-		return speed;
+	public float getParticleSpeed() {
+		return particleSpeed;
 	}
 
-	public void setSpeed(float speed) {
-		this.speed = speed;
+	public void setParticleSpeed(float speed) {
+		this.particleSpeed = speed;
 	}
 
 	public float getSizeFactor() {
@@ -165,19 +121,8 @@ public class ParticleSystem extends GameObject {
 		this.sizeFactor = sizeFactor;
 	}
 
-	public int getFrameCounter() {
-		return frameCounter;
-	}
-
-	public void setFrameCounter(int frameCounter) {
-		this.frameCounter = frameCounter;
-	}
-
-	public boolean isDestroyed() {
-		return destroyed;
-	}
-
-	public void setDestroyed(boolean destroyed) {
-		this.destroyed = destroyed;
+	public void setPositionAndAngle(final Point position, final float angleInDegrees) {
+		this.setPosition(position);
+		this.setAngleInDegrees(angleInDegrees);
 	}
 }

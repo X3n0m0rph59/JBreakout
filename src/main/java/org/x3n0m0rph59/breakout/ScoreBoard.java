@@ -4,11 +4,10 @@ import java.awt.Font;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.TrueTypeFont;
 
-public class ScoreBoard {
+public class ScoreBoard implements Renderable {
 	private List<Brick> bricks = new ArrayList<>();
 	
 	public ScoreBoard() {
@@ -16,29 +15,29 @@ public class ScoreBoard {
 		final float line_height = 78.5f;
 		final EnumSet<Brick.Behavior> normalBehavior = EnumSet.noneOf(Brick.Behavior.class);
 		
-		bricks.add(new Brick(Brick.Type.NORMAL, normalBehavior, 0.0f, 
-							 Config.getInstance().getScreenWidth() - Config.SCOREBOARD_WIDTH + 25, 
-							 y_start + line_height * 1, 
+		bricks.add(new Brick(Brick.Type.NORMAL, normalBehavior, 0.0f, 0.0f, 
+							 new Point(Config.getInstance().getScreenWidth() - Config.SCOREBOARD_WIDTH + 25, 
+							 y_start + line_height * 1), 
 							 65.0f, Config.BRICK_HEIGHT));
 		
-		bricks.add(new Brick(Brick.Type.WEAK, normalBehavior, 0.0f, 
-							 Config.getInstance().getScreenWidth() - Config.SCOREBOARD_WIDTH + 25, 
-							 y_start + line_height * 2, 
+		bricks.add(new Brick(Brick.Type.WEAK, normalBehavior, 0.0f, 0.0f,
+							 new Point(Config.getInstance().getScreenWidth() - Config.SCOREBOARD_WIDTH + 25, 
+							 y_start + line_height * 2), 
 							 65.0f, Config.BRICK_HEIGHT));
 		
-		bricks.add(new Brick(Brick.Type.HARD, normalBehavior, 0.0f, 
-							 Config.getInstance().getScreenWidth() - Config.SCOREBOARD_WIDTH + 25, 
-							 y_start + line_height * 3, 
+		bricks.add(new Brick(Brick.Type.HARD, normalBehavior, 0.0f,  0.0f,
+							 new Point(Config.getInstance().getScreenWidth() - Config.SCOREBOARD_WIDTH + 25, 
+							 y_start + line_height * 3), 
 							 65.0f, Config.BRICK_HEIGHT));
 		
-		bricks.add(new Brick(Brick.Type.SOLID, normalBehavior, 0.0f, 
-							 Config.getInstance().getScreenWidth() - Config.SCOREBOARD_WIDTH + 25, 
-							 y_start + line_height * 4, 
+		bricks.add(new Brick(Brick.Type.SOLID, normalBehavior, 0.0f, 0.0f,
+							 new Point(Config.getInstance().getScreenWidth() - Config.SCOREBOARD_WIDTH + 25, 
+							 y_start + line_height * 4), 
 							 65.0f, Config.BRICK_HEIGHT));
 		
-		bricks.add(new Brick(Brick.Type.POWERUP, normalBehavior, 0.0f, 
-						 	 Config.getInstance().getScreenWidth() - Config.SCOREBOARD_WIDTH + 25, 
-							 y_start + line_height * 5, 
+		bricks.add(new Brick(Brick.Type.POWERUP, normalBehavior, 0.0f, 0.0f,
+							 new Point(Config.getInstance().getScreenWidth() - Config.SCOREBOARD_WIDTH + 25, 
+							 y_start + line_height * 5), 
 							 65.0f, Config.BRICK_HEIGHT));
 	}
 	
@@ -47,9 +46,10 @@ public class ScoreBoard {
 		TrueTypeFont font = FontLoader.getInstance().getFont("Comic Sans", Font.BOLD, 28);
 		TrueTypeFont smallFont = FontLoader.getInstance().getFont("Comic Sans", Font.BOLD, 24);
 		
-		int score = currentScene.getScore();
-		int level = currentScene.getLevel();
-		int ballsLeft = currentScene.getBallsLeft();
+		final int score = currentScene.getScore();
+		final int level = currentScene.getLevel();
+		final int ballsLeft = currentScene.getBallsLeft();
+		final int spaceBombsLeft = currentScene.getSpaceBombsLeft();
 		
 		// Draw separator bar
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
@@ -71,6 +71,7 @@ public class ScoreBoard {
 		font.drawString(Config.getInstance().getScreenWidth() - Config.SCOREBOARD_WIDTH + 25, 50,  "Score: " + score);
 		font.drawString(Config.getInstance().getScreenWidth() - Config.SCOREBOARD_WIDTH + 25, 90,  "Level: " + (level + 1));
 		font.drawString(Config.getInstance().getScreenWidth() - Config.SCOREBOARD_WIDTH + 25, 130, "Balls: " + ballsLeft);
+		font.drawString(Config.getInstance().getScreenWidth() - Config.SCOREBOARD_WIDTH + 25, 170, "Bombs: " + spaceBombsLeft);
 		
 		font.drawString(Config.getInstance().getScreenWidth() - Config.SCOREBOARD_WIDTH + 25, 270, "Brick Types");
 		

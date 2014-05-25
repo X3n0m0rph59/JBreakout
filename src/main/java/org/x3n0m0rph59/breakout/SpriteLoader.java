@@ -2,7 +2,6 @@ package org.x3n0m0rph59.breakout;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.SpriteSheet;
 

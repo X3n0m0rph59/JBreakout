@@ -52,30 +52,94 @@ public class MainWindow {
 			if (Config.getInstance().isDebugging()) {
 				displayMode = new DisplayMode(
 						(int) Config.FORCE_SCREEN_WIDTH,
-						(int) Config.FORCE_SCREEN_HEIGHT);
-			} else {
-				if (Config.FULLSCREEN) {
+						(int) Config.FORCE_SCREEN_HEIGHT);				
+			} else if (Config.getInstance().isWindowed()) {				
+				if (Config.getInstance().useUserSpecifiedVideoMode()) {
 					DisplayMode[] modes = Display.getAvailableDisplayModes();
-
+					
+					// use matching windowed (non-fullscreen) mode
+					final int xres = Config.getInstance().getRequestedXres(), 
+							  yres = Config.getInstance().getRequestedYres();
+					for (int i = 0; i < modes.length; i++) {					
+						if (modes[i].getWidth() == xres && 
+							modes[i].getHeight() == yres) {
+							
+							if (!modes[i].isFullscreenCapable()) {
+								displayMode = modes[i];							
+								break;
+							}
+						}
+					}	
+					
+					// try harder if we failed until here
+					if (displayMode == null) {
+						Logger.log("Display mode enumeration failed, forcing mode", 1);
+						displayMode = new DisplayMode(xres, yres);
+					}
+				} else {
+					DisplayMode[] modes = Display.getAvailableDisplayModes();
+	
+					// use largest windowed (non-fullscreen) mode
+					int xres = 0, yres = 0;
+					for (int i = 0; i < modes.length; i++) {					
+						if (modes[i].getWidth() > xres && 
+							modes[i].getHeight() > yres) {
+							
+//							if (!modes[i].isFullscreenCapable()) {
+								displayMode = modes[i];
+//							}
+							
+							xres = displayMode.getWidth();
+							yres = displayMode.getHeight();
+						}
+					}
+					
+					// try harder if we failed until here
+					if (displayMode == null) {
+						Logger.log("Display mode enumeration failed, forcing mode", 1);
+						displayMode = new DisplayMode(xres, yres);
+					}
+				}
+			} else {
+				if (Config.getInstance().useUserSpecifiedVideoMode()) {
+					DisplayMode[] modes = Display.getAvailableDisplayModes();
+					
+					// use matching fullscreen mode
+					final int xres = Config.getInstance().getRequestedXres(), 
+							  yres = Config.getInstance().getRequestedYres();
+					for (int i = 0; i < modes.length; i++) {					
+						if (modes[i].getWidth() == xres && 
+							modes[i].getHeight() == yres) {
+							
+							if (modes[i].isFullscreenCapable()) {
+								displayMode = modes[i];							
+								break;
+							}
+						}
+					}										
+				} else {
+					DisplayMode[] modes = Display.getAvailableDisplayModes();
+	
 					// use largest fullscreen mode
 					int xres = 0, yres = 0;
 					for (int i = 0; i < modes.length; i++) {
 						if (modes[i].isFullscreenCapable()) {
-							if (modes[i].getWidth() > xres
-									&& modes[i].getHeight() > yres) {
+							if (modes[i].getWidth() > xres && 
+								modes[i].getHeight() > yres) {
+								
 								displayMode = modes[i];
-
+	
 								xres = displayMode.getWidth();
 								yres = displayMode.getHeight();
 							}
 						}
 					}
-
-				} else {
-					displayMode = new DisplayMode(
-							(int) Config.FORCE_SCREEN_WIDTH,
-							(int) Config.FORCE_SCREEN_HEIGHT);
 				}
+			}
+			
+			if (displayMode == null) {
+				System.err.println("Unable to set video mode");
+				System.exit(1);
 			}
 			
 			Config.getInstance().setScreenHeight(displayMode.getHeight());
@@ -83,7 +147,7 @@ public class MainWindow {
 
 			Logger.log("Using mode: "
 					+ (int) Config.getInstance().getScreenWidth() + "x"
-					+ (int) Config.getInstance().getScreenHeight());
+					+ (int) Config.getInstance().getScreenHeight(), 1);
 			
 			Display.setDisplayModeAndFullscreen(displayMode);	
 			Display.create();			

@@ -1,39 +1,46 @@
 package org.x3n0m0rph59.breakout;
 
-import org.newdawn.slick.geom.Rectangle;
+public class Particle implements Renderable, Stepable, Destroyable {
+	private final Sprite sprite;
+	
+	private Point position;
+	private int initialttl, ttl; 
+	private float dx, dy, angle, angularDeviation, 
+				  angularVelocity, size, sizeIncrease;
 
-public class Particle extends GameObject {	
-	private float x, y, dx, dy, width, height, initialttl, ttl, size, sizeIncrease;
-	private float angularMomentum, angle;
 	private boolean destroyed = false;
 	
-	private Sprite sprite;
-	
-	public Particle(Sprite sprite, float x, float y, float dx, float dy, float angularMomentum, float ttl, float sizeIncrease) {
-		this.x = x;
-		this.y = y;
+	public Particle(Sprite sprite, Point position, float angleInDegrees, float angularDeviation, float speed, float angularVelocity, int ttl, float sizeIncrease) {
+		this.sprite = sprite;
+		this.position = position;
+		this.angle = angleInDegrees;
 		
-		this.dx = dx;
-		this.dy = dy;
+		this.angularDeviation = (float) Util.random((int) -angularDeviation, (int) +angularDeviation);
+		this.dx = (float) Math.cos(Math.toRadians(angleInDegrees + this.angularDeviation)) * speed;
+		this.dy = (float) Math.sin(Math.toRadians(angleInDegrees + this.angularDeviation)) * speed;
 		
-		this.angularMomentum = (float) Util.random((int) -angularMomentum, (int) +angularMomentum);
-
+		this.angularVelocity = angularVelocity;
+		
 		this.initialttl = ttl;
 		this.ttl = ttl;
 		
 		this.size = 1.0f;
 		this.sizeIncrease = sizeIncrease;
-		
-		this.angle = 0.0f;
-		
-		this.sprite = sprite;
 	}
 
 	@Override
-	public void render() {
-		sprite.setAlpha((ttl / initialttl) * 1.5f /* * (ttl / initialttl) */);
+	public void render() {		
+		final Sprite sprite = this.getSprite();
+		
+		sprite.setAlpha(initialttl / (getAge() + 0.1f) / 5);		
+		
 		sprite.setAngle(angle);
-		sprite.render(x, y, width, height);
+		
+		sprite.setWidth(size);
+		sprite.setHeight(size);
+		sprite.setCenterOfRotation(new Point(size / 2, size /2));
+		
+		sprite.render(new Point(position.getX(), position.getY()));
 	}
 
 	@Override
@@ -41,37 +48,54 @@ public class Particle extends GameObject {
 		if ((ttl -= 1.0f) <= 0)
 			setDestroyed(true);
 		
-		angle += angularMomentum;
+		angle += angularVelocity;
 		size += sizeIncrease;
 		
-		x += dx;
-		y += dy;
+		position = new Point(position.getX() + dx, position.getY() + dy);
 		
-		width  = (getAge() + 1.0f) + size;
-		height = (getAge() + 1.0f) + size;
-		
-		sprite.step();
+		getSprite().step();
+	}
+	
+	public int getTtl() {
+		return ttl;
+	}
+
+	public void setTtl(int ttl) {
+		this.ttl = ttl;
+	}
+
+	public int getAge() {
+		return initialttl - ttl;
 	}
 
 	@Override
-	public Rectangle getBoundingBox() {
-		return new Rectangle(x, y, width, height);
+	public boolean isDestroyed() {
+		return destroyed;
 	}
 
-	public float getX() {
-		return x;
+	@Override
+	public void setDestroyed(boolean destroyed) {
+		this.destroyed = destroyed;
 	}
 
-	public void setX(float x) {
-		this.x = x;
+	public Sprite getSprite() {
+		return sprite;
 	}
 
-	public float getY() {
-		return y;
+	public Point getPosition() {
+		return position;
 	}
 
-	public void setY(float y) {
-		this.y = y;
+	public void setPosition(Point position) {
+		this.position = position;
+	}
+
+	public int getInitialttl() {
+		return initialttl;
+	}
+
+	public void setInitialttl(int initialttl) {
+		this.initialttl = initialttl;
 	}
 
 	public float getDx() {
@@ -90,40 +114,118 @@ public class Particle extends GameObject {
 		this.dy = dy;
 	}
 
-	public float getWidth() {
-		return width;
+	public float getAngle() {
+		return angle;
 	}
 
-	public void setWidth(float width) {
-		this.width = width;
+	public void setAngle(float angle) {
+		this.angle = angle;
 	}
 
-	public float getHeight() {
-		return height;
+	public float getAngularDeviation() {
+		return angularDeviation;
 	}
 
-	public void setHeight(float height) {
-		this.height = height;
+	public void setAngularDeviation(float angularDeviation) {
+		this.angularDeviation = angularDeviation;
 	}
 
-	public float getTtl() {
-		return ttl;
+	public float getAngularVelocity() {
+		return angularVelocity;
 	}
 
-	public void setTtl(float ttl) {
-		this.ttl = ttl;
+	public void setAngularVelocity(float angularVelocity) {
+		this.angularVelocity = angularVelocity;
 	}
 
-	public boolean isDestroyed() {
-		return destroyed;
+	public float getSize() {
+		return size;
 	}
 
-	public void setDestroyed(boolean destroyed) {
-		this.destroyed = destroyed;
-	}
-	
-	public float getAge() {
-		return initialttl - ttl;
+	public void setSize(float size) {
+		this.size = size;
 	}
 
+	public float getSizeIncrease() {
+		return sizeIncrease;
+	}
+
+	public void setSizeIncrease(float sizeIncrease) {
+		this.sizeIncrease = sizeIncrease;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Float.floatToIntBits(angle);
+		result = prime * result + Float.floatToIntBits(angularDeviation);
+		result = prime * result + Float.floatToIntBits(angularVelocity);
+		result = prime * result + (destroyed ? 1231 : 1237);
+		result = prime * result + Float.floatToIntBits(dx);
+		result = prime * result + Float.floatToIntBits(dy);
+		result = prime * result + initialttl;
+		result = prime * result
+				+ ((position == null) ? 0 : position.hashCode());
+		result = prime * result + Float.floatToIntBits(size);
+		result = prime * result + Float.floatToIntBits(sizeIncrease);
+		result = prime * result + ((sprite == null) ? 0 : sprite.hashCode());
+		result = prime * result + ttl;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Particle other = (Particle) obj;
+		if (Float.floatToIntBits(angle) != Float.floatToIntBits(other.angle))
+			return false;
+		if (Float.floatToIntBits(angularDeviation) != Float
+				.floatToIntBits(other.angularDeviation))
+			return false;
+		if (Float.floatToIntBits(angularVelocity) != Float
+				.floatToIntBits(other.angularVelocity))
+			return false;
+		if (destroyed != other.destroyed)
+			return false;
+		if (Float.floatToIntBits(dx) != Float.floatToIntBits(other.dx))
+			return false;
+		if (Float.floatToIntBits(dy) != Float.floatToIntBits(other.dy))
+			return false;
+		if (initialttl != other.initialttl)
+			return false;
+		if (position == null) {
+			if (other.position != null)
+				return false;
+		} else if (!position.equals(other.position))
+			return false;
+		if (Float.floatToIntBits(size) != Float.floatToIntBits(other.size))
+			return false;
+		if (Float.floatToIntBits(sizeIncrease) != Float
+				.floatToIntBits(other.sizeIncrease))
+			return false;
+		if (sprite == null) {
+			if (other.sprite != null)
+				return false;
+		} else if (!sprite.equals(other.sprite))
+			return false;
+		if (ttl != other.ttl)
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "Particle [sprite=" + sprite + ", position=" + position
+				+ ", initialttl=" + initialttl + ", ttl=" + ttl + ", dx=" + dx
+				+ ", dy=" + dy + ", angle=" + angle + ", angularDeviation="
+				+ angularDeviation + ", angularVelocity=" + angularVelocity
+				+ ", size=" + size + ", sizeIncrease=" + sizeIncrease
+				+ ", destroyed=" + destroyed + "]";
+	}
 }

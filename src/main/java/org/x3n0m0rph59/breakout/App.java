@@ -1,5 +1,7 @@
 package org.x3n0m0rph59.breakout;
 
+//import java.io.File;
+
 /**
  * The main class of JBreakout which holds the program entrypoint
  * @author user
@@ -15,6 +17,8 @@ public class App
 	 */
     public static void main(String[] args)
     {
+//    	System.setProperty("org.lwjgl.librarypath", new File("natives").getAbsolutePath());
+    	
     	Config.getInstance().parseCommandLine(args);
     	
     	mainWindow = new MainWindow();    	

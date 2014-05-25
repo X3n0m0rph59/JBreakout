@@ -35,10 +35,11 @@ public class BackgroundFactory {
 		
 		final float width  = (float) Util.random(512, (int) Config.getInstance().getClientWidth());
 		final float height = (float) Util.random(512, (int) Config.getInstance().getScreenHeight());
+		final float angle  = (float) Util.random(0, 360);
 		final float speed  = (float) Util.random((int) Config.BACKGROUND_MIN_SPEED, 
 												 (int) Config.BACKGROUND_MAX_SPEED);
 		
-		return new Background(sprite, (float) Util.random(0, (int) Config.getInstance().getClientWidth() - (int) width), 
-							  -height, width, height, speed);
+		return new Background(sprite, new Point((float) Util.random(0, (int) Config.getInstance().getClientWidth() - (int) width), -height), 
+							  width, height, angle, speed);
 	}
 }

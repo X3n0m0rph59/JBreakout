@@ -1,59 +1,59 @@
 package org.x3n0m0rph59.breakout;
 
-//import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.geom.Rectangle;
 
 public class Ball extends GameObject {
-	private float x,y,radius = Config.BALL_RADIUS;
-	private float velX = 0, velY = 0;
-	private float speed = Config.BALL_SPEED;
+	private static final float throwAngle = -45.0f;
+	
+	private float speed = 1.0f;
 	
 	public enum State {ROLLING, STUCK_TO_PADDLE}
 	private State state = State.ROLLING;
 	
 	private boolean multiball = false;
-	private boolean destroyed = false;
-	
-	private Sprite spriteNormalBall = new Sprite("sprites/ball.png", Config.BALL_RADIUS * 2, 
+		
+	private final Sprite spriteNormalBall = new Sprite("sprites/ball.png", Config.BALL_RADIUS * 2, 
 												Config.BALL_RADIUS * 2, 200, 200);
-	private Sprite spriteFireBall = new Sprite("sprites/fireball.png", Config.BALL_RADIUS * 2, 
+	private final Sprite spriteFireBall = new Sprite("sprites/fireball.png", Config.BALL_RADIUS * 2, 
 												Config.BALL_RADIUS * 2, 200, 200);
 	
-	private ParticleSystem trail = new ParticleSystem(new SpriteTuple[]{new SpriteTuple("sprites/Star1.png", 255.0f, 255.0f, 255, 255), 
+	private final ParticleSystem trail = new ParticleSystem(new SpriteTuple[]{new SpriteTuple("sprites/Star1.png", 255.0f, 255.0f, 255, 255), 
 																	  new SpriteTuple("sprites/Star2.png", 345.0f, 342.0f, 345, 342), 
 																	  new SpriteTuple("sprites/Star3.png", 270.0f, 261.0f, 270, 261), 
 																	  new SpriteTuple("sprites/Star4.png", 264.0f, 285.0f, 264, 285)}, 
-															x, y, 1.0f, 5.0f, 0.0f, 45.0f, 2.0f, 15.0f, 15.0f, 5.0f);
+															new Point(0.0f, 0.0f), -1.0f, 5.0f, 0.0f, 45.0f, 2.0f, 15.0f, 15.0f, 5.0f);
 	
-	private ParticleSystem fireBallTrail = new ParticleSystem(new SpriteTuple[]{new SpriteTuple("sprites/fire.png", 198.0f, 197.0f, 198, 197)}, 
-															x, y, 1.0f, 25.0f, 0.0f, 25.0f, 2.0f, 15.0f, 25.0f, 25.0f);
+	private final ParticleSystem fireBallTrail = new ParticleSystem(new SpriteTuple[]{new SpriteTuple("sprites/fire.png", 198.0f, 197.0f, 198, 197)}, 
+															new Point(0.0f, 0.0f), -1.0f, 25.0f, 0.0f, 25.0f, 2.0f, 15.0f, 25.0f, 25.0f);
 	
 	
-	public Ball(float x, float y) {
-		this(x, y, false);
+	public Ball(Point position) {
+		this(position, false);
 	}
 	
-	public Ball(float x, float y, boolean multiball) {
-		this.x = x;
-		this.y = y;
+	public Ball(Point position, boolean multiball) {
+		super(null, position, Config.BALL_RADIUS * 2, Config.BALL_RADIUS * 2, 
+			  throwAngle, 0.0f, 
+			  (float) Math.cos(Math.toRadians(throwAngle)) * +Config.BALL_SPEED, 
+			  (float) Math.sin(Math.toRadians(throwAngle)) * -Config.BALL_SPEED);
 		
 		this.multiball = multiball;
-		
-		final float angle = (float) Math.toRadians(45.0f);		
-		this.velX = (float) Math.cos(angle) * speed;
-		this.velY = (float) Math.sin(angle) * -speed;
 	}
 	
 	@Override
 	public void render() {		
-		if (EffectManager.getInstance().isEffectActive(EffectType.FIREBALL)) {
-			fireBallTrail.render();
-			spriteFireBall.render(x, y);			
+		if (EffectManager.getInstance().isEffectActive(EffectType.FIREBALL)) {			
+			fireBallTrail.render();			
+			setSprite(spriteFireBall);	
+			
+			super.render();
 		} else {
 			if (EffectManager.getInstance().isEffectActive(EffectType.STICKY_BALL))
 				trail.render();
 			
-			spriteNormalBall.render(x, y);
+			setSprite(spriteNormalBall);
+			
+			super.render();
 		}
 				
 //		GL11.glBegin(GL11.GL_TRIANGLE_FAN);
@@ -76,64 +76,47 @@ public class Ball extends GameObject {
 	}
 
 	@Override
-	public void step() {		
-		if (state != State.STUCK_TO_PADDLE) {
-			x += velX * Config.getInstance().getSpeedFactor();
-			y += velY * Config.getInstance().getSpeedFactor();
+	public void step() {
+		if (state != State.STUCK_TO_PADDLE) {						
+			super.step();	
 		}
 		
 		spriteNormalBall.step();
 		spriteFireBall.step();
 		
 		updateTrailPosition();
-		
+
 		trail.step();
 		fireBallTrail.step();
 	}
 
 	private void updateTrailPosition() {
-		trail.setPosition(x, y, (float) Math.toRadians(getAngle() + 90.0f));
-		fireBallTrail.setPosition(x, y, (float) Math.toRadians(getAngle() + 90.0f));
+		trail.setPositionAndAngle(this.getPosition(), getMovementAngleInDegrees());
+		fireBallTrail.setPositionAndAngle(this.getPosition(), getMovementAngleInDegrees());
 	}
 
 	@Override
 	public Rectangle getBoundingBox() {
-		return new Rectangle(x, y, radius * 2, radius * 2);
+		return new Rectangle(position.getX(), position.getY(), Config.BALL_RADIUS, Config.BALL_RADIUS);
 	}
 		
 	public void invertXVelocity() {
-		velX *= -1;
+		setDeltaX(getDeltaX() * -1);
 		
 		updateTrailPosition();
 	}
 
 	public void invertYVelocity() {
-		velY *= -1;
+		setDeltaY(getDeltaY() * -1);
 		
 		updateTrailPosition();
 	}
 
-	public void setPosition(float x, float y) {
-		this.x = x;
-		this.y = y;
+	@Override
+	public void setPosition(Point position) {
+		super.setPosition(position);
 		
 		updateTrailPosition();
-	}
-
-	public boolean isDestroyed() {
-		return destroyed;
-	}
-	
-	public void setDestroyed(boolean b) {
-		destroyed = b;
-	}
-
-	public float getVelX() {
-		return velX;
-	}
-	
-	public float getVelY() {
-		return velY;
 	}
 
 	public float getSpeed() {
@@ -143,8 +126,8 @@ public class Ball extends GameObject {
 	public void setSpeed(float speed) {
 		this.speed = speed;
 		
-		velX = (float) Math.cos(Math.toRadians(getAngle())) * speed;
-		velY = (float) Math.sin(Math.toRadians(getAngle())) * -speed;
+		setDeltaX((float) Math.cos(Math.toRadians(getMovementAngleInDegrees())) * speed);
+		setDeltaY((float) Math.sin(Math.toRadians(getMovementAngleInDegrees())) * -speed);
 		
 		updateTrailPosition();
 	}
@@ -157,29 +140,18 @@ public class Ball extends GameObject {
 		this.state = state;
 	}
 
-	public void moveBy(float dX, float dY) {
-		this.x += dX;
-		this.y += dY;
-		
-		updateTrailPosition();
-	}
-
-	public void changeSpeed(float v) {
-		speed *= v;
-		
-		final float angle = getAngle();
-		velX = (float) Math.cos(Math.toRadians(angle)) * speed;
-		velY = (float) Math.sin(Math.toRadians(angle)) * -speed;
+	@Override
+	public void changePosition(float deltaX, float deltaY) {
+		super.changePosition(deltaX, deltaY);
 		
 		updateTrailPosition();
 	}
 	
-	public void changeAngle(float delta) {
-		float angle = getAngle();				
-		angle += delta;		
+	public void changeMovementAngle(float delta) {
+		setMovementAngle(getMovementAngleInDegrees() + delta);		
 		
-		velX = (float) Math.cos(Math.toRadians(angle)) * speed;
-		velY = (float) Math.sin(Math.toRadians(angle)) * -speed;
+		setDeltaX((float) Math.cos(Math.toRadians(getMovementAngleInDegrees())) * speed);
+		setDeltaY((float) Math.sin(Math.toRadians(getMovementAngleInDegrees())) * -speed);
 		
 		updateTrailPosition();
 	}
@@ -188,23 +160,24 @@ public class Ball extends GameObject {
 		return multiball;
 	}
 	
-	public void setAngle(float angle) {		
-		velX = (float) Math.cos(Math.toRadians(angle)) * speed;
-		velY = (float) Math.sin(Math.toRadians(angle)) * -speed;
+	
+	public void setMovementAngle(float movementAngleInDegrees) {
+		setDeltaX((float) Math.cos(Math.toRadians(getMovementAngleInDegrees())) * speed);
+		setDeltaY((float) Math.sin(Math.toRadians(getMovementAngleInDegrees())) * -speed);
 		
 		updateTrailPosition();
-	}
-
-	public float getAngle() {		
-		return (float) Math.toDegrees(Math.atan2(-velY, velX));
 	}
 
 	public void reflect() {
-		final float angle = getAngle() * -1;
+		final float movementAngleInDegrees = getMovementAngleInDegrees() * -1;
 		
-		velX = (float) Math.cos(Math.toRadians(angle)) * speed;
-		velY = (float) Math.sin(Math.toRadians(angle)) * -speed;
+		setDeltaX((float) Math.cos(Math.toRadians(movementAngleInDegrees)) * speed);
+		setDeltaY((float) Math.sin(Math.toRadians(movementAngleInDegrees)) * -speed);
 		
 		updateTrailPosition();
+	}
+	
+	public float getMovementAngleInDegrees() {
+		return (float) Math.toDegrees(Math.atan2(-getY(), getX()));
 	}
 }
