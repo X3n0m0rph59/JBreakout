@@ -3,8 +3,6 @@ package org.x3n0m0rph59.breakout;
 import java.util.EnumMap;
 import java.util.Map;
 
-import org.x3n0m0rph59.breakout.SpaceBomb.State;
-
 public class Powerup extends GameObject {
 	public enum State {FLOATING, STUCK_TO_GRAPPLING_HOOK}
 	private State state = State.FLOATING;

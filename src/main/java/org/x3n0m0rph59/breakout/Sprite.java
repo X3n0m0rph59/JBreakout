@@ -7,12 +7,15 @@ import org.newdawn.slick.geom.Rectangle;
 
 public class Sprite {
 	private SpriteSheet spriteSheet;
+	
 	private int frameCounter = 0;
 	
 	private float width, height, alpha = 1.0f, angleInDegrees = 0.0f;
 	
 	private boolean hasAlphaChannel;
 	private Point centerOfRotation = new Point(0.0f, 0.0f);
+	
+	private boolean flashed = false;
 	
 	public Sprite(String filename, float width, float height, int tw, int th) {
 		this(filename, width, height, tw, th, false);
@@ -47,7 +50,10 @@ public class Sprite {
 		img.setCenterOfRotation(centerOfRotation.getX(), centerOfRotation.getY());		
 		img.rotate(angleInDegrees);
 		
-		img.draw(position.getX(), position.getY(), width, height);
+		if (flashed)
+			img.drawFlash(position.getX(), position.getY(), width, height);
+		else
+			img.draw(position.getX(), position.getY(), width, height);
 		
 		GL11.glDisable(GL11.GL_ALPHA_TEST);
 		GL11.glDisable(GL11.GL_BLEND);
@@ -108,6 +114,14 @@ public class Sprite {
 
 	public void setCenterOfRotation(Point position) {
 		centerOfRotation = position;
+	}
+
+	public boolean isFlashed() {
+		return flashed;
+	}
+
+	public void setFlashed(boolean flashed) {
+		this.flashed = flashed;
 	}
 
 	@Override

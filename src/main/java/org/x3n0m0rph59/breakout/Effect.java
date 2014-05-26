@@ -1,6 +1,6 @@
 package org.x3n0m0rph59.breakout;
 
-public class Effect {
+public class Effect implements Stepable {
 	private EffectType type;
 	private float effectDuration;
 	private boolean expired = false;
@@ -48,28 +48,6 @@ public class Effect {
 		}
 	}
 	
-	public void step() {
-		if (--effectDuration <= 0) {
-			expire();
-		}		
-	}
-	
-	public EffectType getType() {
-		return type;
-	}
-
-	public float getEffectDuration() {
-		return effectDuration;
-	}
-
-	public void setEffectDuration(int effectDuration) {
-		this.effectDuration = effectDuration;
-	}
-
-	public boolean isExpired() {
-		return expired;
-	}
-
 	public void expire() {
 		this.expired = true;
 		
@@ -110,5 +88,75 @@ public class Effect {
 		default:
 			throw new RuntimeException("Unsupported EffectType: " + type);		
 		}
+	}
+	
+	@Override
+	public void step() {
+		if (--effectDuration <= 0) {
+			expire();
+		}		
+	}
+	
+	public EffectType getType() {
+		return type;
+	}
+
+	public float getEffectDuration() {
+		return effectDuration;
+	}
+
+	public void setEffectDuration(int effectDuration) {
+		this.effectDuration = effectDuration;
+	}
+
+	public boolean isExpired() {
+		return expired;
+	}
+
+	public void setType(EffectType type) {
+		this.type = type;
+	}
+
+	public void setEffectDuration(float effectDuration) {
+		this.effectDuration = effectDuration;
+	}
+
+	public void setExpired(boolean expired) {
+		this.expired = expired;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Float.floatToIntBits(effectDuration);
+		result = prime * result + (expired ? 1231 : 1237);
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Effect other = (Effect) obj;
+		if (Float.floatToIntBits(effectDuration) != Float
+				.floatToIntBits(other.effectDuration))
+			return false;
+		if (expired != other.expired)
+			return false;
+		if (type != other.type)
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "Effect [type=" + type + ", effectDuration=" + effectDuration
+				+ ", expired=" + expired + "]";
 	}
 }

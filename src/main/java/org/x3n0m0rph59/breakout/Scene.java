@@ -25,6 +25,7 @@ public final class Scene {
 	private State state = State.LOADING;
 	
 	private ScoreBoard scoreBoard = new ScoreBoard();
+	private BottomWall bottomWall = new BottomWall();
 	
 	private HashMap<String, String> levelMetadata;
 	private int level = 0;
@@ -159,7 +160,7 @@ public final class Scene {
 		
 		// Draw a wall on the bottom of the screen?
 		if (EffectManager.getInstance().isEffectActive(EffectType.BOTTOM_WALL)) {
-			drawBottomWall();
+			bottomWall.render();
 		}
 		
 		for (ParticleSystem p : particleEffects) {
@@ -255,28 +256,7 @@ public final class Scene {
 //		drawRect(bottom_left);
 		
 		GL11.glPopMatrix();
-	}
-
-	private void drawBottomWall() {
-		for (int i = 0; i <= Config.getInstance().getClientWidth() / (Config.BOTTOM_WALL_SEGMENT_WIDTH + Config.BOTTOM_WALL_SEGMENT_SPACING); i++) {
-			float x = i * (Config.BOTTOM_WALL_SEGMENT_WIDTH + Config.BOTTOM_WALL_SEGMENT_SPACING);
-			float y = Config.getInstance().getScreenHeight() - Config.BOTTOM_WALL_HEIGHT;
-			
-			final float width = Config.BOTTOM_WALL_SEGMENT_WIDTH;
-			final float height = Config.BOTTOM_WALL_SEGMENT_HEIGHT;
-			
-			GL11.glDisable(GL11.GL_TEXTURE_2D);
-			GL11.glDisable(GL11.GL_BLEND);
-			
-			GL11.glBegin(GL11.GL_QUADS);
-				GL11.glColor3f(1.0f, 0.0f, 0.0f);			
-				GL11.glVertex2f(x, y);			
-				GL11.glVertex2f(x + width, y);			
-				GL11.glVertex2f(x + width, y + height);			
-				GL11.glVertex2f(x, y + height);
-			GL11.glEnd();
-		}
-	}
+	}	
 	
 //	private void drawRect(Rectangle r) {
 //		GL11.glDisable(GL11.GL_TEXTURE_2D);
@@ -423,6 +403,8 @@ public final class Scene {
 			}
 			
 			paddle.step();
+			
+			bottomWall.step();
 			
 			doCollisionDetection();
 			doCleanup();
@@ -581,10 +563,12 @@ public final class Scene {
 	}
 		
 	public void releaseSpaceBomb() {
-		if (spaceBombsLeft-- > 0) {
+		if (spaceBombsLeft > 0) {
 			spaceBombs.add(new SpaceBomb(new Point(paddle.getCenterPoint().getX(), 
 												   paddle.getCenterPoint().getY() - 10.0f), 
 												   SpaceBomb.Type.USER_FIRED));
+			
+			spaceBombsLeft--;
 			
 			SoundLayer.playSound(Sounds.SPACEBOMB_LAUNCH);
 		}
@@ -704,7 +688,7 @@ public final class Scene {
 										
 						
 					// avoid double collisions by placing the ball above the paddle
-//					ball.setPosition(new Point(ball.getX(), paddle.getY() - (ball.getHeight() + 1.0f)));
+					ball.setPosition(new Point(ball.getX(), paddle.getY() - (ball.getHeight() + 1.0f)));
 															
 					
 					// Sticky ball?
@@ -725,13 +709,13 @@ public final class Scene {
 			}
 		}
 		
-		// Caught a powerup?
-//		for (Powerup p : powerups) {
-//			if (Util.collisionTest(paddle.getBoundingBox(), p.getBoundingBox())) {
-//				EffectManager.getInstance().addEffect(p.getType());
-//				p.setDestroyed(true);
-//			}
-//		}
+		// Caught a powerup with the paddle?
+		for (Powerup p : powerups) {
+			if (Util.collisionTest(paddle.getBoundingBox(), p.getBoundingBox())) {
+				EffectManager.getInstance().addEffect(p.getType());
+				p.setDestroyed(true);
+			}
+		}
 		
 		// Projectile vs. Bricks		
 		for (Projectile p : projectiles) {

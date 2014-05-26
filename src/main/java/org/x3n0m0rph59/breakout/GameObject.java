@@ -38,7 +38,7 @@ public class GameObject implements Renderable, Stepable, Destroyable {
 	public void render() {
 		sprite.setWidth(width);
 		sprite.setHeight(height);		
-		sprite.setCenterOfRotation(new Point(width / 2, height /2));
+		sprite.setCenterOfRotation(new Point(sprite.getWidth() / 2, sprite.getHeight() / 2));
 		
 		if (sprite != null)
 			sprite.render(position);

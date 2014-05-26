@@ -58,8 +58,12 @@ public class Brick extends GameObject {
 		
 		Sprite sprite = sprites.get(type);
 		if (sprite != null) {
+			sprite.setWidth(width);
+			sprite.setHeight(height);
+			
+			sprite.setCenterOfRotation(new Point(sprite.getWidth() / 2, sprite.getHeight() / 2));
 			sprite.setAngle(angleInDegrees);
-			sprite.setCenterOfRotation(new Point((sprite.getWidth() - 1) / 16, (sprite.getHeight() - 1) / 16));
+			
 			sprite.render(new Point(x, getY()), width, height);
 		}
 	}
@@ -79,18 +83,20 @@ public class Brick extends GameObject {
 				setPosition(new Point(Config.BRICK_OFFSET_X - width, getY()));
 		}
 			
-		if(behavior.contains(Behavior.ROTATE_LEFT)) {
-			setAngularVelocity(getAngularVelocity() * speed * Config.getInstance().getSpeedFactor());
-			setAngleInDegrees(getAngleInDegrees() - angularVelocity);
-			
-		} else if(behavior.contains(Behavior.ROTATE_RIGHT)) {
-			setAngularVelocity(getAngularVelocity() * speed * Config.getInstance().getSpeedFactor());
-			setAngleInDegrees(getAngleInDegrees() + angularVelocity);
-		}
+//		if(behavior.contains(Behavior.ROTATE_LEFT)) {
+//			setAngularVelocity(getAngularVelocity() * speed * Config.getInstance().getSpeedFactor());
+//			setAngleInDegrees(getAngleInDegrees() - angularVelocity);
+//			
+//		} else if(behavior.contains(Behavior.ROTATE_RIGHT)) {
+//			setAngularVelocity(getAngularVelocity() * speed * Config.getInstance().getSpeedFactor());
+//			setAngleInDegrees(getAngleInDegrees() + angularVelocity);
+//		}
 		
 		
 		for (Sprite s : sprites.values())
 			s.step();
+		
+		super.step();
 	}
 	
 	public void hit() {

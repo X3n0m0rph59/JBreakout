@@ -45,7 +45,6 @@ public final class Config {
 	/** Bias of pitch when in accelerated or decelerated mode */
 	public static final float MUSIC_PITCH_BIAS = 1.5f;
 	
-	
 	/** Initial number of lives left */
 	public static final int INITIAL_BALLS_LEFT = 4;
 	
@@ -74,6 +73,10 @@ public final class Config {
 	
 	/** Time in seconds before an active effect is expired */
 	public static final float EFFECT_DURATION = 15.0f;
+	public static final float EFFECT_GRACE_PERIOD = SYNC_FPS * 3;
+	
+	/** How many times a second an object flashes when in "effect grace period" */
+	public static final float GRACE_PERIOD_BLINK_RATE = 0.25f;
 	
 	/** Lower end of the range of randomized scroll speeds for background sprites */
 	public static final float BACKGROUND_MIN_SPEED = 1.0f;
@@ -108,6 +111,9 @@ public final class Config {
 	
 	/** Movement speed of animated bricks */
 	public static final float BRICK_MOVEMENT_SPEED = 0.5f;
+	
+	/** Rotation speed of animated bricks */
+	public static final float BRICK_ROTATION_SPEED = 1.0f;
 	
 	/** Multiplier used to compute bricks with multiple movement specifiers */
 	public static final float BRICK_MOVEMENT_MULTIPLIER = 2.0f;

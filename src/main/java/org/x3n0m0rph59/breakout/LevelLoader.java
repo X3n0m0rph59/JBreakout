@@ -33,7 +33,7 @@ public class LevelLoader {
 					
 					switch (c) {
 					case '#':
-						// '#' comment char, ignore everything until next line
+						// '#' comment char
 						commentLine = true;
 						commentCharIndex = i;
 						break charLoop;
@@ -46,7 +46,9 @@ public class LevelLoader {
 					if (pair.length == 2) {
 						data.put(pair[0].trim(), pair[1].trim());
 					} else {
-						throw new RuntimeException("Malformed level metadata: " + line);
+						// skip, maybe it is a user comment?
+						
+						//throw new RuntimeException("Malformed level metadata: " + line);
 					}
 				}
 			}
@@ -219,8 +221,11 @@ public class LevelLoader {
 					final float BRICK_SPEED = Config.BRICK_MOVEMENT_SPEED * multiplier;
 					
 					float ANGULAR_VELOCITY = 0.0f;
-					if (behavior.contains(Brick.Behavior.ROTATE_LEFT) || behavior.contains(Brick.Behavior.ROTATE_RIGHT))					
-						ANGULAR_VELOCITY = Config.BRICK_MOVEMENT_SPEED * multiplier;
+					if (behavior.contains(Brick.Behavior.ROTATE_LEFT))					
+						ANGULAR_VELOCITY = -(Config.BRICK_ROTATION_SPEED * multiplier);
+					else if (behavior.contains(Brick.Behavior.ROTATE_RIGHT))
+						ANGULAR_VELOCITY = +(Config.BRICK_ROTATION_SPEED * multiplier);
+					
 										
 					bricks.add(new Brick(type, behavior, BRICK_SPEED, ANGULAR_VELOCITY,
 										 new Point((cindex * (BRICK_WIDTH  + Config.BRICK_SPACING_X)) + Config.BRICK_OFFSET_X, 

@@ -1,6 +1,7 @@
 package org.x3n0m0rph59.breakout;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -8,10 +9,7 @@ public final class EffectManager {
 	private static final EffectManager instance = new EffectManager();	
 	private List<Effect> effectList = new ArrayList<Effect>();
 	
-	public EffectManager() {
 		
-	}
-	
 	public void addEffect(EffectType type) {
 		effectList.add(new Effect(type, Config.SYNC_FPS * Config.EFFECT_DURATION));
 		
@@ -62,7 +60,9 @@ public final class EffectManager {
 	public void expireEffect(Effect e) {		
 		switch (e.getType()) {
 		case BOTTOM_WALL:
-			App.getMainWindow().getScene().addTextAnimation("No more Bottom Wall!");
+			// Test if we really are the last active effect of this type
+			if (!isEffectActive(EffectType.BOTTOM_WALL))
+				App.getMainWindow().getScene().addTextAnimation("No more Bottom Wall!");
 			break;
 			
 		case ENLARGE_PADDLE:
@@ -70,14 +70,18 @@ public final class EffectManager {
 			break;
 			
 		case FIREBALL:
-			App.getMainWindow().getScene().addTextAnimation("Fireball vanished!");
+			// Test if we really are the last active effect of this type
+			if (!isEffectActive(EffectType.FIREBALL))
+				App.getMainWindow().getScene().addTextAnimation("Fireball vanished!");
 			break;
 			
 		case MULTIBALL:			
 			break;
 			
 		case PADDLE_GUN:
-			App.getMainWindow().getScene().addTextAnimation("Guns jammed!");
+			// Test if we really are the last active effect of this type
+			if (!isEffectActive(EffectType.PADDLE_GUN))
+				App.getMainWindow().getScene().addTextAnimation("Guns jammed!");
 			break;
 			
 		case SHRINK_PADDLE:
@@ -85,7 +89,9 @@ public final class EffectManager {
 			break;	
 			
 		case STICKY_BALL:
-			App.getMainWindow().getScene().addTextAnimation("No more Sticky Ball!");
+			// Test if we really are the last active effect of this type
+			if (!isEffectActive(EffectType.STICKY_BALL))
+				App.getMainWindow().getScene().addTextAnimation("No more Sticky Ball!");
 			break;
 			
 		case SPEED_UP:
@@ -108,6 +114,28 @@ public final class EffectManager {
 			if (e.getType() == effect)
 				return true;			
 		}
+		
+		return false;
+	}
+	
+	public boolean isEffectInGracePeriod(EffectType effect) {
+		List<Effect> candidates = new ArrayList<>();
+		
+		for (Effect e : effectList) {
+			if (e.getType() == effect) {
+				candidates.add(e);
+			}
+		}
+		
+		candidates.sort(new Comparator<Effect>() {
+							public int compare(Effect o1, Effect o2) { 
+								return (int) (o2.getEffectDuration() - o1.getEffectDuration());
+							}
+		});
+		
+		if (candidates.size() > 0)
+			if (candidates.get(0).getEffectDuration() <= Config.EFFECT_GRACE_PERIOD)
+				return true;
 		
 		return false;
 	}

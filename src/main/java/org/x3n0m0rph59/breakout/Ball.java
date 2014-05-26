@@ -7,6 +7,8 @@ public class Ball extends GameObject {
 	
 	private float speed = 1.0f;
 	
+	boolean drawFlash = false;
+	
 	public enum State {ROLLING, STUCK_TO_PADDLE}
 	private State state = State.ROLLING;
 	
@@ -42,19 +44,26 @@ public class Ball extends GameObject {
 	
 	@Override
 	public void render() {		
-		if (EffectManager.getInstance().isEffectActive(EffectType.FIREBALL)) {			
-			fireBallTrail.render();			
-			setSprite(spriteFireBall);	
+		if (EffectManager.getInstance().isEffectActive(EffectType.FIREBALL)) {
 			
-			super.render();
+			fireBallTrail.render();			
+			setSprite(spriteFireBall);							
 		} else {
 			if (EffectManager.getInstance().isEffectActive(EffectType.STICKY_BALL))
 				trail.render();
 			
 			setSprite(spriteNormalBall);
-			
-			super.render();
 		}
+		
+		final boolean inGracePeriod = EffectManager.getInstance().isEffectInGracePeriod(EffectType.STICKY_BALL) || 
+				  					  EffectManager.getInstance().isEffectInGracePeriod(EffectType.FIREBALL);
+
+		if (inGracePeriod && drawFlash)
+			getSprite().setFlashed(true);
+		else
+			getSprite().setFlashed(false);
+		
+		super.render();
 				
 //		GL11.glBegin(GL11.GL_TRIANGLE_FAN);
 //			if (EffectManager.getInstance().isEffectActive(EffectType.FIREBALL))
@@ -88,6 +97,9 @@ public class Ball extends GameObject {
 
 		trail.step();
 		fireBallTrail.step();
+		
+		if ((frameCounter % (Config.SYNC_FPS * Config.GRACE_PERIOD_BLINK_RATE)) == 0)
+			drawFlash = !drawFlash;
 	}
 
 	private void updateTrailPosition() {

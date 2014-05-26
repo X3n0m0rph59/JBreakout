@@ -10,13 +10,14 @@ public enum EffectType {
 	PADDLE_GUN,
 	STICKY_BALL,
 	SPEED_UP,
-	SLOW_DOWN,
-	
-	// Bonuses
-	// NEW_BALL,
-	// SCORE_BOOST,
+	SLOW_DOWN,	
 	
 	// TODO:
 	// 2d movement of paddle
 	// multi paddle
+	// Ball movement influenced by mouse
+	
+	// Bonuses
+	// NEW_BALL,
+	// SCORE_BOOST,
 }

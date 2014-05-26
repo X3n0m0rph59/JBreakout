@@ -38,7 +38,7 @@ public class Particle implements Renderable, Stepable, Destroyable {
 		
 		sprite.setWidth(size);
 		sprite.setHeight(size);
-		sprite.setCenterOfRotation(new Point(size / 2, size /2));
+		sprite.setCenterOfRotation(new Point(sprite.getWidth() / 2, sprite.getHeight() / 2));
 		
 		sprite.render(new Point(position.getX(), position.getY()));
 	}

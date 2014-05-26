@@ -5,6 +5,8 @@ import org.lwjgl.input.Mouse;
 public class Paddle extends GameObject {	
 	private float lastX = 0.0f, lastY = 0.0f;
 	
+	boolean drawFlash = false;
+	
 	private final ParticleSystem leftEngine = new ParticleSystem(new SpriteTuple[]{new SpriteTuple("sprites/fire.png", 198.0f, 197.0f, 198, 197)}, 
 			    new Point(0.0f, 0.0f), -1.0f, 15.0f, 0.0f, 25.0f, 0.0f, 15.0f, 10.0f, 8.5f);
 	
@@ -28,6 +30,14 @@ public class Paddle extends GameObject {
 		rightEngine.render();
 		
 		getGrapplingHook().render();
+		
+		final boolean inGracePeriod = EffectManager.getInstance().isEffectInGracePeriod(EffectType.ENLARGE_PADDLE) || 
+									  EffectManager.getInstance().isEffectInGracePeriod(EffectType.SHRINK_PADDLE);
+		
+		if (inGracePeriod && drawFlash)
+			getSprite().setFlashed(true);
+		else
+			getSprite().setFlashed(false);
 		
 		super.render();
 	}
@@ -53,6 +63,9 @@ public class Paddle extends GameObject {
 		rightEngine.step();
 		
 		grapplingHook.step();
+		
+		if ((frameCounter % (Config.SYNC_FPS * Config.GRACE_PERIOD_BLINK_RATE)) == 0)
+			drawFlash = !drawFlash;
 		
 		super.step();
 	}
