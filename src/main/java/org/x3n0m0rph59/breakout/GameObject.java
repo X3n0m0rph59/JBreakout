@@ -47,13 +47,21 @@ public class GameObject implements Renderable, Stepable, Destroyable {
 	public void step() {
 		frameCounter++;
 		
-		setAngleInDegrees(getAngleInDegrees() + (getAngularVelocity() * Config.getInstance().getSpeedFactor()));
+		float speedFactor = 1.0f;
+		if (!this.isExcemptFromSpeedFactorChange())
+			speedFactor = Config.getInstance().getSpeedFactor();
 		
-		changePosition(getDeltaX() * Config.getInstance().getSpeedFactor(),
-				       getDeltaY() * Config.getInstance().getSpeedFactor());
+		setAngleInDegrees(getAngleInDegrees() + (getAngularVelocity() * speedFactor));
+		
+		changePosition(getDeltaX() * speedFactor,
+				       getDeltaY() * speedFactor);
 
 		if (sprite != null)
 			sprite.step();
+	}
+
+	public boolean isExcemptFromSpeedFactorChange() {
+		return false;
 	}
 
 	public Rectangle getBoundingBox() {

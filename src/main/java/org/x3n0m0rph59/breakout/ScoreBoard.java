@@ -4,6 +4,7 @@ import java.awt.Font;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.TrueTypeFont;
 
@@ -42,14 +43,13 @@ public class ScoreBoard implements Renderable {
 	}
 	
 	public void render() {
-		Scene currentScene = App.getMainWindow().getScene();
 		TrueTypeFont font = FontLoader.getInstance().getFont("Comic Sans", Font.BOLD, 28);
 		TrueTypeFont smallFont = FontLoader.getInstance().getFont("Comic Sans", Font.BOLD, 24);
 		
-		final int score = currentScene.getScore();
-		final int level = currentScene.getLevel();
-		final int ballsLeft = currentScene.getBallsLeft();
-		final int spaceBombsLeft = currentScene.getSpaceBombsLeft();
+		final int score = GameState.getScore();
+		final int level = GameState.getLevel();
+		final int ballsLeft = GameState.getBallsLeft();
+		final int spaceBombsLeft = GameState.getSpaceBombsLeft();
 		
 		// Draw separator bar
 		GL11.glDisable(GL11.GL_TEXTURE_2D);

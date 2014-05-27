@@ -14,14 +14,15 @@ enum Sounds {
 	SOLID_BRICK_HIT, 
 	PADDLE_HIT, 
 	WALL_HIT,	
-	BALL_LOST,	
+	BALL_LOST,
+	BONUS_BALL,
 	POWERUP_SPAWNED,	
 	BRICK_DESTROYED,
 	BULLET_FIRED,
 	GRAPPLING_HOOK_LOOP,
 	SPACEBOMB_LAUNCH,
 	SPACEBOMB_EXPLOSION,
-	QUIT
+	QUIT,
 }
 
 enum Musics { 
@@ -122,6 +123,7 @@ public final class SoundLayer {
 		soundMap.put(Sounds.PADDLE_HIT, new SoundSprite("paddle_hit.ogg"));
 		soundMap.put(Sounds.WALL_HIT, new SoundSprite("wall_hit.ogg"));
 		soundMap.put(Sounds.BALL_LOST, new SoundSprite("ball_lost.ogg"));
+		soundMap.put(Sounds.BONUS_BALL, new SoundSprite("bonus_ball.ogg"));
 		soundMap.put(Sounds.POWERUP_SPAWNED, new SoundSprite("powerup_spawned.ogg"));
 		soundMap.put(Sounds.BRICK_DESTROYED, new SoundSprite("brick_destroyed.ogg"));
 		soundMap.put(Sounds.BULLET_FIRED, new SoundSprite("bullet_fired.ogg"));

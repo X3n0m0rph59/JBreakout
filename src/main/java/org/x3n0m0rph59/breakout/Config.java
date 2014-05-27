@@ -62,6 +62,9 @@ public final class Config {
 	
 	/** Ball radius */
 	public static final float BALL_RADIUS = 10.0f;
+	
+	/** Get a free ball every nth points */
+	public static final int BONUS_BALL_SCORE = 100000;
 		
 	
 	/** Speed up the game by this factor when a speedup powerup is caught */
@@ -134,7 +137,7 @@ public final class Config {
 	/** The height of the paddle */
 	public static final float PADDLE_HEIGHT = 25.0f;
 	
-	/** Horizontal offset of the "Engine" ParticelSystem */
+	/** Horizontal offset of the "Engine" particle systems */
 	public static final float PADDLE_ENGINE_OFFSET = 5.0f;
 	
 	public static final int STAR_DENSITY = 2;
@@ -162,7 +165,7 @@ public final class Config {
 	
 	public static final float GRAPPLING_HOOK_EXTEND_SPEED = 10.0f;
 	public static final float GRAPPLING_HOOK_LOWER_SPEED = GRAPPLING_HOOK_EXTEND_SPEED;
-	public static final float GRAPPLING_HOOK_LENGTH = 350.0f;
+	public static final float GRAPPLING_HOOK_LENGTH = 450.0f;
 	
 	public static final float BOTTOM_WALL_HEIGHT = 15.0f;	
 	public static final float BOTTOM_WALL_SEGMENT_WIDTH = 45.0f;

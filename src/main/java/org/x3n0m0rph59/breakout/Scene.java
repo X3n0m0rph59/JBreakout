@@ -17,7 +17,7 @@ import org.newdawn.slick.geom.Circle;
 import org.newdawn.slick.geom.Vector2f;
 
 
-public final class Scene {
+public class Scene {
 	public enum State {LOADING, NEW_STAGE, WAITING_FOR_BALL, RUNNING, STAGE_CLEARED, 
 					   RESTART, PAUSED, GAME_OVER, LEVEL_SET_COMPLETED, TERMINATED};
 	private enum ParticleEffect {BRICK_EXPLOSION, BALL_LOST};
@@ -27,11 +27,7 @@ public final class Scene {
 	private ScoreBoard scoreBoard = new ScoreBoard();
 	private BottomWall bottomWall = new BottomWall();
 	
-	private HashMap<String, String> levelMetadata;
-	private int level = 0;
-	private int ballsLeft = Config.INITIAL_BALLS_LEFT;
-	private int spaceBombsLeft = Config.INITIAL_SPACEBOMBS_LEFT;
-	private int score = 0; 
+	private HashMap<String, String> levelMetadata;	
 	
 	private Paddle paddle = new Paddle();
 	
@@ -39,8 +35,7 @@ public final class Scene {
 	private List<Brick> bricks = new ArrayList<>();
 	private List<Powerup> powerups = new ArrayList<>();
 	private List<Star> stars = new ArrayList<>();
-	private List<Projectile> projectiles = new ArrayList<>();	
-	private List<TextAnimation> textAnimations = new ArrayList<>();
+	private List<Projectile> projectiles = new ArrayList<>();		
 	private List<ParticleSystem> particleEffects = new ArrayList<>();
 	private List<Background> backgrounds = new ArrayList<>();
 	private List<SpaceBomb> spaceBombs = new ArrayList<>();
@@ -55,22 +50,21 @@ public final class Scene {
 		initLevel(0);						
 	}
 	
-	private void initLevel(int level) {		
+	private void initLevel(int level) {
+		GameState.setLevel(level);
+		
 		EffectManager.getInstance().clearEffects();
+		TextAnimationManager.getInstance().clear();
 		
 		paddle.setWidth(Config.PADDLE_DEFAULT_WIDTH);
 		
 		balls.clear();
 		balls.add(new Ball(new Point((Config.getInstance().getScreenWidth() - Config.SCOREBOARD_WIDTH) / 2, 
 									  Config.getInstance().getScreenHeight() / 2)));
-		
-		levelMetadata = LevelLoader.getLevelMetaData(level);
-		bricks = LevelLoader.loadLevel(level);
-		
+						
 		powerups.clear();
 		projectiles.clear();
-		spaceBombs.clear();
-		textAnimations.clear();
+		spaceBombs.clear();		
 				
 		// Spawn initial set of particles
 		stars.clear();
@@ -83,6 +77,9 @@ public final class Scene {
 		
 		backgrounds.clear();
 		backgrounds.add(BackgroundFactory.getRandomBackground());
+		
+		levelMetadata = LevelLoader.getLevelMetaData(level);
+		bricks = LevelLoader.loadLevel(level);
 	}
 	
 	private String getLevelMetaData(String key) {
@@ -159,7 +156,7 @@ public final class Scene {
 		}
 		
 		// Draw a wall on the bottom of the screen?
-		if (EffectManager.getInstance().isEffectActive(EffectType.BOTTOM_WALL)) {
+		if (EffectManager.getInstance().isEffectActive(Effect.Type.BOTTOM_WALL)) {
 			bottomWall.render();
 		}
 		
@@ -170,13 +167,8 @@ public final class Scene {
 		paddle.render();
 		
 		scoreBoard.render();
-				
-//		for (TextAnimation a : textAnimations) {
-//			a.render();
-//		}
-		
-		if (textAnimations.size() > 0)
-			textAnimations.get(0).render();
+
+		TextAnimationManager.getInstance().render();
 		
 		switch (state) {
 		case LOADING:
@@ -186,7 +178,7 @@ public final class Scene {
 		case NEW_STAGE:
 			drawCenteredText(new String[] {"Level Set: " + getLevelMetaData("Level Set"),
 										   "Level: " + getLevelMetaData("Level"), 
-										   getLevelMetaData("Name"),
+										   "\"" + getLevelMetaData("Name") + "\"",
 										   "",
 										   "Press mouse button to start"}, true);
 			break;
@@ -203,7 +195,7 @@ public final class Scene {
 										   "",
 										   "Level Set: " + getLevelMetaData("Level Set"),
 										   "Level: " + getLevelMetaData("Level"), 
-										   getLevelMetaData("Name"),
+										   "\"" + getLevelMetaData("Name") + "\"",
 										   "",
 										   "Press mouse button to resume"}, true);
 			break;
@@ -216,12 +208,12 @@ public final class Scene {
 			drawCenteredText(new String[] {"*STAGE CLEARED*", "",
 										   "Level Set: " + getLevelMetaData("Level Set"),
 										   "Level: " + getLevelMetaData("Level"), 
-										   getLevelMetaData("Name"),
+										   "\"" + getLevelMetaData("Name") + "\"",
 										   "","Press mouse button to continue"}, true);
 			break;
 			
 		case GAME_OVER:
-			drawCenteredText(new String[] {"*GAME OVER!*", "", "Press F2 to restart or Q to quit"}, true);
+			drawCenteredText(new String[] {"*GAME OVER!*", "", "Press F2 to restart, or Q to quit"}, true);
 			break;
 						
 		case TERMINATED:
@@ -280,7 +272,7 @@ public final class Scene {
 		while (Keyboard.next()) {
 			if ((lastKeyID = Keyboard.getEventKey()) == Keyboard.KEY_ADD && 
 				Keyboard.getEventKeyState()) {
-				initLevel(++level);
+				initLevel(GameState.getLevel() + 1);
 				
 				Logger.log("Cheating to next level", 1);
 			}
@@ -328,7 +320,7 @@ public final class Scene {
 			
 		case STAGE_CLEARED:
 			if (leftMouseButtonPressed || rightMouseButtonPressed) {
-				initLevel(++level);
+				initLevel(GameState.getLevel() + 1);
 				setState(State.NEW_STAGE);
 			}
 			
@@ -360,6 +352,7 @@ public final class Scene {
 			}
 						
 			EffectManager.getInstance().step();
+			TextAnimationManager.getInstance().step();
 			
 			for (Background b : backgrounds) {
 				b.step();
@@ -383,15 +376,7 @@ public final class Scene {
 			
 			for (SpaceBomb b : spaceBombs) {
 				b.step();
-			}
-
-//			for (TextAnimation a : textAnimations) {
-//				a.step();
-//			}
-			
-			if (textAnimations.size() > 0)
-				textAnimations.get(0).step();
-			
+			}			
 			
 			for (ParticleSystem p : particleEffects) {
 				p.step();
@@ -406,6 +391,15 @@ public final class Scene {
 			
 			bottomWall.step();
 			
+			// TODO: Make this work
+//			if (lastKeyID == Keyboard.KEY_LEFT) {				
+//				paddle.changeX(-50.0f);
+//			}
+//			
+//			if (lastKeyID == Keyboard.KEY_RIGHT) {				
+//				paddle.changeX(+50.0f);
+//			}
+			
 			doCollisionDetection();
 			doCleanup();
 			
@@ -414,22 +408,21 @@ public final class Scene {
 			for (SpaceBomb b : spaceBombs) {
 				if (b.getState() == SpaceBomb.State.EXPLODING) {
 					final Point centerOfExplosion = b.getCenterOfExplosion();
-					final Circle explosionRadius = new Circle(centerOfExplosion.getX(), 
+					final Circle explosionCircle = new Circle(centerOfExplosion.getX(), 
 															  centerOfExplosion.getY(), 
 															  Config.SPACEBOMB_EXPLOSION_RADIUS);					
 									
 					for (Brick brick : bricks) {
-						if (explosionRadius.contains(brick.getBoundingBox().getCenterX(), 
-													 brick.getBoundingBox().getCenterY())) {
+						if (explosionCircle.intersects(brick.getBoundingBox())) {
 //							brickHit(brick, null, true);
 							
 							if (brick.getType() != Brick.Type.SOLID) {
-								score += 100;
+								GameState.changeScore(100);
 							}
 							
 							if (brick.getType() == Brick.Type.POWERUP) {
-								score += 1000;			
-								spawnPowerup(b.getPosition(), EffectType.values()[Util.random(0, EffectType.values().length - 1)]);
+								GameState.changeScore(1000);			
+								spawnPowerup(b.getPosition(), Effect.Type.values()[Util.random(0, Effect.Type.values().length - 1)]);
 							}
 							
 							brick.setDestroyed(true);
@@ -451,8 +444,9 @@ public final class Scene {
 			}
 			
 			// Fire projectiles?
-			if (EffectManager.getInstance().isEffectActive(EffectType.PADDLE_GUN)) {
-				if (Mouse.isButtonDown(0) && (frameCounter % Config.PROJECTILE_FIRE_RATE == 0)) {
+			if (EffectManager.getInstance().isEffectActive(Effect.Type.PADDLE_GUN)) {
+				if ((Mouse.isButtonDown(0) || lastKeyID == Keyboard.KEY_SPACE) && 
+					(frameCounter % Config.PROJECTILE_FIRE_RATE == 0)) {
 					for (int i = 0; i < 2; i++) {
 						float x = (frameCounter % (Config.PROJECTILE_FIRE_RATE * 2) == 0) ? 
 								paddle.getX() : paddle.getX() + paddle.getWidth() - Config.PROJECTILE_WIDTH; 
@@ -522,7 +516,7 @@ public final class Scene {
 			break;
 			
 		case RESTART:
-			initLevel(level);			
+			initLevel(GameState.getLevel());			
 			setState(State.NEW_STAGE);
 			break;
 			
@@ -563,12 +557,12 @@ public final class Scene {
 	}
 		
 	public void releaseSpaceBomb() {
-		if (spaceBombsLeft > 0) {
+		if (GameState.getSpaceBombsLeft() > 0) {
 			spaceBombs.add(new SpaceBomb(new Point(paddle.getCenterPoint().getX(), 
 												   paddle.getCenterPoint().getY() - 10.0f), 
 												   SpaceBomb.Type.USER_FIRED));
 			
-			spaceBombsLeft--;
+			GameState.decrementSpaceBombsLeft();
 			
 			SoundLayer.playSound(Sounds.SPACEBOMB_LAUNCH);
 		}
@@ -633,7 +627,7 @@ public final class Scene {
 		for (Ball ball : balls) {
 			if (ball.getState() != Ball.State.STUCK_TO_PADDLE) {
 				if (ball.getY() <= 0 || 
-					(EffectManager.getInstance().isEffectActive(EffectType.BOTTOM_WALL)) && 
+					(EffectManager.getInstance().isEffectActive(Effect.Type.BOTTOM_WALL)) && 
 					 ball.getY() >= (Config.getInstance().getScreenHeight() - Config.BOTTOM_WALL_HEIGHT) - 
 					 								  ball.getHeight()) {
 					ball.invertYVelocity();
@@ -648,7 +642,7 @@ public final class Scene {
 		while (bi.hasNext()) {			
 			Ball ball = bi.next();
 			if (ball.getBoundingBox().getY() >= Config.getInstance().getScreenHeight() && 
-				!EffectManager.getInstance().isEffectActive(EffectType.BOTTOM_WALL)) {
+				!EffectManager.getInstance().isEffectActive(Effect.Type.BOTTOM_WALL)) {
 				ballLost(ball, bi);
 			}
 		}
@@ -684,7 +678,7 @@ public final class Scene {
 					ball.setSpeed(newBallSpeed);
 					
 					// TODO: Fix this. It should not be necessary
-					ball.reflect();
+					ball.invertYVelocity();
 										
 						
 					// avoid double collisions by placing the ball above the paddle
@@ -692,7 +686,7 @@ public final class Scene {
 															
 					
 					// Sticky ball?
-					if (EffectManager.getInstance().isEffectActive(EffectType.STICKY_BALL))
+					if (EffectManager.getInstance().isEffectActive(Effect.Type.STICKY_BALL))
 						ball.setState(Ball.State.STUCK_TO_PADDLE);
 					
 					SoundLayer.playSound(Sounds.PADDLE_HIT);
@@ -769,7 +763,7 @@ public final class Scene {
 		for (SpaceBomb b : spaceBombs) {
 			if (b.getState() == SpaceBomb.State.STUCK_TO_GRAPPLING_HOOK) {
 				if (Util.collisionTest(paddle.getBoundingBox(), b.getBoundingBox())) {
-					spaceBombsLeft++;
+					GameState.incrementSpaceBombsLeft();
 					b.setDestroyed(true);
 				}
 			}
@@ -786,17 +780,17 @@ public final class Scene {
 		
 		if (hitByProjectile) {
 			if (b.getType() != Brick.Type.SOLID) {
-				score += 100;
+				GameState.changeScore(100);
 			}
 			
 			if (b.getType() == Brick.Type.POWERUP) {
-				score += 1000;			
-				spawnPowerup(b.getPosition(), EffectType.values()[Util.random(0, EffectType.values().length - 1)]);
+				GameState.changeScore(1000);			
+				spawnPowerup(b.getPosition(), Effect.Type.values()[Util.random(0, Effect.Type.values().length - 1)]);
 			}
 		}
 		else {
 			// Reflect the ball?			
-			if (!EffectManager.getInstance().isEffectActive(EffectType.FIREBALL) &&
+			if (!EffectManager.getInstance().isEffectActive(Effect.Type.FIREBALL) &&
 				b.getType() != Brick.Type.WEAK) {
 				
 				switch (Util.getCollisionEdge(ball.getBoundingBox(), b.getBoundingBox())) {
@@ -842,12 +836,12 @@ public final class Scene {
 			}			
 			
 			if (b.getType() != Brick.Type.SOLID) {
-				score += 100;		
+				GameState.changeScore(100);		
 			}
 			
 			if (b.getType() == Brick.Type.POWERUP) {
-				score += 1000;			
-				spawnPowerup(b.getPosition(), EffectType.values()[Util.random(0, EffectType.values().length - 1)]);
+				GameState.changeScore(1000);			
+				spawnPowerup(b.getPosition(), Effect.Type.values()[Util.random(0, Effect.Type.values().length - 1)]);
 			}
 		}
 	}
@@ -859,8 +853,8 @@ public final class Scene {
 	
 	private void ballLost(Ball ball, Iterator<Ball> bi) {
 		if (!ball.isMultiball()) {
-			ballsLeft--;
-			score -= 1000;
+			GameState.decrementBallsLeft();
+			GameState.changeScore(-1000);
 		}
 		
 		bi.remove();
@@ -875,7 +869,7 @@ public final class Scene {
 		
 		SoundLayer.playSound(Sounds.BALL_LOST);
 		
-		if (ballsLeft <= 0) {
+		if (GameState.getBallsLeft() <= 0) {
 			setState(State.GAME_OVER);
 		}
 	}
@@ -900,11 +894,10 @@ public final class Scene {
 		cleanupList(projectiles);
 		cleanupList(spaceBombs);
 		cleanupList(stars);
-		cleanupList(textAnimations);
 		cleanupList(particleEffects);
 	}
 	
-	public void spawnPowerup(Point position, EffectType effectType) {
+	public void spawnPowerup(Point position, Effect.Type effectType) {
 		Logger.log("Spawned powerup: " + effectType, 1);
 		
 		powerups.add(new Powerup(position, effectType));
@@ -912,36 +905,8 @@ public final class Scene {
 		SoundLayer.playSound(Sounds.POWERUP_SPAWNED);
 	}
 	
-	public void addTextAnimation(String text) {
-		textAnimations.add(new TextAnimation(text));
-	}
-	
-	public int getBallsLeft() {
-		return ballsLeft;
-	}
-
-	public void setBallsLeft(int ballsLeft) {
-		this.ballsLeft = ballsLeft;
-	}
-
-	public int getSpaceBombsLeft() {
-		return spaceBombsLeft;
-	}
-
-	public void setSpaceBombsLeft(int spaceBombsLeft) {
-		this.spaceBombsLeft = spaceBombsLeft;
-	}
-
-	public int getScore() {
-		return score;
-	}
-
-	public void setScore(int score) {
-		this.score = score;
-	}
-	
-	public int getLevel() {		
-		return level;
+	public void addTextAnimation(String text) {		
+		TextAnimationManager.getInstance().add(text);
 	}
 
 	public Paddle getPaddle() {
@@ -961,10 +926,10 @@ public final class Scene {
 			break;
 			
 		case RESTART:
-			level = 0;
-			score = 0;
-			ballsLeft = Config.INITIAL_BALLS_LEFT;
-			spaceBombsLeft = Config.INITIAL_SPACEBOMBS_LEFT;
+			GameState.setLevel(0);
+			GameState.setScore(0);
+			GameState.setBallsLeft(Config.INITIAL_BALLS_LEFT);
+			GameState.setSpaceBombsLeft(Config.INITIAL_SPACEBOMBS_LEFT);
 			break;
 			
 		case GAME_OVER:

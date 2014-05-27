@@ -15,7 +15,7 @@ public class BottomWall implements Stepable, Renderable {
 			final float width = Config.BOTTOM_WALL_SEGMENT_WIDTH;
 			final float height = Config.BOTTOM_WALL_SEGMENT_HEIGHT;
 			
-			final boolean inGracePeriod = EffectManager.getInstance().isEffectInGracePeriod(EffectType.BOTTOM_WALL);			
+			final boolean inGracePeriod = EffectManager.getInstance().isEffectInGracePeriod(Effect.Type.BOTTOM_WALL);			
 			
 			if ((frameCounter % (Config.SYNC_FPS * Config.GRACE_PERIOD_BLINK_RATE)) == 0)
 				drawFlash = !drawFlash;

@@ -31,8 +31,8 @@ public class Paddle extends GameObject {
 		
 		getGrapplingHook().render();
 		
-		final boolean inGracePeriod = EffectManager.getInstance().isEffectInGracePeriod(EffectType.ENLARGE_PADDLE) || 
-									  EffectManager.getInstance().isEffectInGracePeriod(EffectType.SHRINK_PADDLE);
+		final boolean inGracePeriod = EffectManager.getInstance().isEffectInGracePeriod(Effect.Type.ENLARGE_PADDLE) || 
+									  EffectManager.getInstance().isEffectInGracePeriod(Effect.Type.SHRINK_PADDLE);
 		
 		if (inGracePeriod && drawFlash)
 			getSprite().setFlashed(true);

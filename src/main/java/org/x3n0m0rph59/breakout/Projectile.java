@@ -15,4 +15,9 @@ public class Projectile extends GameObject {
 			setDestroyed(true);
 	}
 	
+	@Override
+	public boolean isExcemptFromSpeedFactorChange() {
+		return true;
+	}
+	
 }

@@ -10,7 +10,7 @@ public final class EffectManager {
 	private List<Effect> effectList = new ArrayList<Effect>();
 	
 		
-	public void addEffect(EffectType type) {
+	public void addEffect(Effect.Type type) {
 		effectList.add(new Effect(type, Config.SYNC_FPS * Config.EFFECT_DURATION));
 		
 		switch (type) {
@@ -61,7 +61,7 @@ public final class EffectManager {
 		switch (e.getType()) {
 		case BOTTOM_WALL:
 			// Test if we really are the last active effect of this type
-			if (!isEffectActive(EffectType.BOTTOM_WALL))
+			if (!isEffectActive(Effect.Type.BOTTOM_WALL))
 				App.getMainWindow().getScene().addTextAnimation("No more Bottom Wall!");
 			break;
 			
@@ -71,7 +71,7 @@ public final class EffectManager {
 			
 		case FIREBALL:
 			// Test if we really are the last active effect of this type
-			if (!isEffectActive(EffectType.FIREBALL))
+			if (!isEffectActive(Effect.Type.FIREBALL))
 				App.getMainWindow().getScene().addTextAnimation("Fireball vanished!");
 			break;
 			
@@ -80,7 +80,7 @@ public final class EffectManager {
 			
 		case PADDLE_GUN:
 			// Test if we really are the last active effect of this type
-			if (!isEffectActive(EffectType.PADDLE_GUN))
+			if (!isEffectActive(Effect.Type.PADDLE_GUN))
 				App.getMainWindow().getScene().addTextAnimation("Guns jammed!");
 			break;
 			
@@ -90,7 +90,7 @@ public final class EffectManager {
 			
 		case STICKY_BALL:
 			// Test if we really are the last active effect of this type
-			if (!isEffectActive(EffectType.STICKY_BALL))
+			if (!isEffectActive(Effect.Type.STICKY_BALL))
 				App.getMainWindow().getScene().addTextAnimation("No more Sticky Ball!");
 			break;
 			
@@ -109,7 +109,7 @@ public final class EffectManager {
 		Logger.log("Effect expired: " + e.getType(), 1);
 	}
 	
-	public boolean isEffectActive(EffectType effect) {
+	public boolean isEffectActive(Effect.Type effect) {
 		for (Effect e : effectList) {
 			if (e.getType() == effect)
 				return true;			
@@ -118,7 +118,7 @@ public final class EffectManager {
 		return false;
 	}
 	
-	public boolean isEffectInGracePeriod(EffectType effect) {
+	public boolean isEffectInGracePeriod(Effect.Type effect) {
 		List<Effect> candidates = new ArrayList<>();
 		
 		for (Effect e : effectList) {

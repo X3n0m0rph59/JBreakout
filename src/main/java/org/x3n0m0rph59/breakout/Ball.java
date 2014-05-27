@@ -44,19 +44,19 @@ public class Ball extends GameObject {
 	
 	@Override
 	public void render() {		
-		if (EffectManager.getInstance().isEffectActive(EffectType.FIREBALL)) {
+		if (EffectManager.getInstance().isEffectActive(Effect.Type.FIREBALL)) {
 			
 			fireBallTrail.render();			
 			setSprite(spriteFireBall);							
 		} else {
-			if (EffectManager.getInstance().isEffectActive(EffectType.STICKY_BALL))
+			if (EffectManager.getInstance().isEffectActive(Effect.Type.STICKY_BALL))
 				trail.render();
 			
 			setSprite(spriteNormalBall);
 		}
 		
-		final boolean inGracePeriod = EffectManager.getInstance().isEffectInGracePeriod(EffectType.STICKY_BALL) || 
-				  					  EffectManager.getInstance().isEffectInGracePeriod(EffectType.FIREBALL);
+		final boolean inGracePeriod = EffectManager.getInstance().isEffectInGracePeriod(Effect.Type.STICKY_BALL) || 
+				  					  EffectManager.getInstance().isEffectInGracePeriod(Effect.Type.FIREBALL);
 
 		if (inGracePeriod && drawFlash)
 			getSprite().setFlashed(true);

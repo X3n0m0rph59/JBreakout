@@ -108,6 +108,11 @@ public class GrapplingHook extends GameObject {
 		return hook.getBoundingBox();
 	}
 	
+	@Override
+	public boolean isExcemptFromSpeedFactorChange() {
+		return true;
+	}
+	
 	public Point getHookCenterPoint() {
 		return hook.getCenterPosition();
 	}

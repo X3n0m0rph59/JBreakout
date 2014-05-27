@@ -111,6 +111,11 @@ public class SpaceBomb extends GameObject {
 		} else
 			throw new RuntimeException("Invalid type: " + type);			
 	}
+	
+	@Override
+	public boolean isExcemptFromSpeedFactorChange() {
+		return true;
+	}
 
 	public Point getCenterOfExplosion() {
 		return getCenterPosition();

@@ -1,11 +1,33 @@
 package org.x3n0m0rph59.breakout;
 
 public class Effect implements Stepable {
-	private EffectType type;
+	public enum Type {
+		// Special effects/abilities
+		FIREBALL,
+		MULTIBALL,
+		ENLARGE_PADDLE, 
+		SHRINK_PADDLE, 
+		BOTTOM_WALL, 
+		PADDLE_GUN,
+		STICKY_BALL,
+		SPEED_UP,
+		SLOW_DOWN,	
+		
+		// TODO:
+		// 2d movement of paddle
+		// multi paddle
+		// Ball movement influenced by mouse
+		
+		// Bonuses
+		// NEW_BALL,
+		// SCORE_BOOST,
+	}
+	
+	private Type type;
 	private float effectDuration;
 	private boolean expired = false;
 	
-	public Effect(EffectType type, float effectDuration) {
+	public Effect(Type type, float effectDuration) {
 		this.type = type;
 		this.effectDuration = effectDuration;
 		
@@ -97,7 +119,7 @@ public class Effect implements Stepable {
 		}		
 	}
 	
-	public EffectType getType() {
+	public Type getType() {
 		return type;
 	}
 
@@ -113,7 +135,7 @@ public class Effect implements Stepable {
 		return expired;
 	}
 
-	public void setType(EffectType type) {
+	public void setType(Type type) {
 		this.type = type;
 	}
 

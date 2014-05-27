@@ -40,4 +40,8 @@ public class GrapplingHookSegment extends GameObject {
 		segment.step();
 	}
 	
+	@Override
+	public boolean isExcemptFromSpeedFactorChange() {
+		return true;
+	}
 }
