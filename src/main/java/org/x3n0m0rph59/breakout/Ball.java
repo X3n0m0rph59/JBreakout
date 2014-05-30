@@ -27,8 +27,8 @@ public class Ball extends GameObject {
 	
 	private final ParticleSystem fireBallTrail = new ParticleSystem(new SpriteTuple[]{new SpriteTuple("sprites/fire.png", 198.0f, 197.0f, 198, 197)}, 
 															new Point(0.0f, 0.0f), -1.0f, 25.0f, 0.0f, 25.0f, 2.0f, 15.0f, 25.0f, 25.0f);
-	
-	
+
+		
 	public Ball(Point position) {
 		this(position, false);
 	}
@@ -138,8 +138,8 @@ public class Ball extends GameObject {
 	public void setSpeed(float speed) {
 		this.speed = speed;
 		
-		setDeltaX((float) Math.cos(Math.toRadians(getMovementAngleInDegrees())) * speed);
-		setDeltaY((float) Math.sin(Math.toRadians(getMovementAngleInDegrees())) * -speed);
+		setDeltaX((float) Math.sin(Math.toRadians(getMovementAngleInDegrees())) * speed);
+		setDeltaY((float) Math.cos(Math.toRadians(getMovementAngleInDegrees())) * speed);
 		
 		updateTrailPosition();
 	}
@@ -162,9 +162,6 @@ public class Ball extends GameObject {
 	public void changeMovementAngle(float delta) {
 		setMovementAngle(getMovementAngleInDegrees() + delta);		
 		
-		setDeltaX((float) Math.cos(Math.toRadians(getMovementAngleInDegrees())) * speed);
-		setDeltaY((float) Math.sin(Math.toRadians(getMovementAngleInDegrees())) * -speed);
-		
 		updateTrailPosition();
 	}
 
@@ -173,23 +170,28 @@ public class Ball extends GameObject {
 	}
 	
 	
-	public void setMovementAngle(float movementAngleInDegrees) {
-		setDeltaX((float) Math.cos(Math.toRadians(getMovementAngleInDegrees())) * speed);
-		setDeltaY((float) Math.sin(Math.toRadians(getMovementAngleInDegrees())) * -speed);
+	public void setMovementAngle(float movementAngleInDegrees) {		
+		setDeltaX((float) Math.sin(Math.toRadians(movementAngleInDegrees)) * speed);
+		setDeltaY((float) Math.cos(Math.toRadians(movementAngleInDegrees)) * speed);
 		
 		updateTrailPosition();
 	}
 
 	public void reflect() {
-		final float movementAngleInDegrees = getMovementAngleInDegrees() * -1;
+		float movementAngleInDegrees = getMovementAngleInDegrees();
 		
-		setDeltaX((float) Math.cos(Math.toRadians(movementAngleInDegrees)) * speed);
-		setDeltaY((float) Math.sin(Math.toRadians(movementAngleInDegrees)) * -speed);
+		movementAngleInDegrees -= 90;
+		movementAngleInDegrees *= -1;
+		movementAngleInDegrees += 90;
+		movementAngleInDegrees %= 360;
+		
+		setDeltaX((float) Math.sin(Math.toRadians(movementAngleInDegrees)) * speed);
+		setDeltaY((float) Math.cos(Math.toRadians(movementAngleInDegrees)) * speed);
 		
 		updateTrailPosition();
 	}
 	
 	public float getMovementAngleInDegrees() {
-		return (float) Math.toDegrees(Math.atan2(-getY(), getX()));
+		return (float) Math.toDegrees(Math.atan2(getX(), getY()));
 	}
 }

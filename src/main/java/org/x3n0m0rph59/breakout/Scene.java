@@ -14,7 +14,6 @@ import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.TrueTypeFont;
 import org.newdawn.slick.geom.Circle;
-import org.newdawn.slick.geom.Vector2f;
 
 
 public class Scene {
@@ -44,6 +43,8 @@ public class Scene {
 	
 	private int frameCounter = 0;
 	
+	private int spaceBombCoolDownTime = 0;
+	
 	public Scene() {
 		font = FontLoader.getInstance().getFont("Verdana", Font.BOLD, Config.TOAST_FONT_SIZE);
 		
@@ -53,9 +54,17 @@ public class Scene {
 	private void initLevel(int level) {
 		GameState.setLevel(level);
 		
+//		don't reset the frame counter for now (game balance)
+//		it influences whether new space bombs are spawned etc. 
+//		frameCounter = 0;
+		
+		// reset cooldown timers
+		spaceBombCoolDownTime = 0;
+		
 		EffectManager.getInstance().clearEffects();
 		TextAnimationManager.getInstance().clear();
 		
+		paddle.getGrapplingHook().resetState();
 		paddle.setWidth(Config.PADDLE_DEFAULT_WIDTH);
 		
 		balls.clear();
@@ -262,7 +271,11 @@ public class Scene {
 //	}
 	
 	public void step() {
-		frameCounter++;		
+		frameCounter++;
+		
+		// cooldown timers
+		spaceBombCoolDownTime--;
+		
 		
 		float mdx = (int) Mouse.getDX();
 		// float mdy = (int) Mouse.getDY();
@@ -556,15 +569,28 @@ public class Scene {
 		}
 	}
 		
-	public void releaseSpaceBomb() {
+	public void releaseSpaceBomb() {			
 		if (GameState.getSpaceBombsLeft() > 0) {
-			spaceBombs.add(new SpaceBomb(new Point(paddle.getCenterPoint().getX(), 
-												   paddle.getCenterPoint().getY() - 10.0f), 
-												   SpaceBomb.Type.USER_FIRED));
+			if (spaceBombCoolDownTime > 0)
+			{
+				TextAnimationManager.getInstance().add("Bomb not ready yet!");
+				
+				SoundLayer.playSound(Sounds.ACTION_DENIED);
+				
+			} else {
+				spaceBombs.add(new SpaceBomb(new Point(paddle.getCenterPoint().getX(), 
+													   paddle.getCenterPoint().getY() - 10.0f), 
+													   SpaceBomb.Type.USER_FIRED));
+				
+				GameState.decrementSpaceBombsLeft();				
+				spaceBombCoolDownTime = Config.SPACEBOMB_COOLDOWN_TIME;
+				
+				SoundLayer.playSound(Sounds.SPACEBOMB_LAUNCH);
+			}
+		} else {
+			TextAnimationManager.getInstance().add("No bomb available!");
 			
-			GameState.decrementSpaceBombsLeft();
-			
-			SoundLayer.playSound(Sounds.SPACEBOMB_LAUNCH);
+			SoundLayer.playSound(Sounds.ACTION_DENIED);
 		}
 	}
 
@@ -591,6 +617,7 @@ public class Scene {
 		// Ball vs. Edges
 		for (Ball ball : balls) {			
 			// sanity check ball coordinates
+			// clamp ball to client area
 			if ((ball.getX() + ball.getWidth()) >= Config.getInstance().getClientWidth()) {
 				final float newX = (Config.getInstance().getClientWidth() - (ball.getWidth()));				
 				final float newY = ball.getY(); 
@@ -641,8 +668,8 @@ public class Scene {
 		Iterator<Ball> bi = balls.iterator();
 		while (bi.hasNext()) {			
 			Ball ball = bi.next();
-			if (ball.getBoundingBox().getY() >= Config.getInstance().getScreenHeight() && 
-				!EffectManager.getInstance().isEffectActive(Effect.Type.BOTTOM_WALL)) {
+			if (ball.getBoundingBox().getY() >= Config.getInstance().getScreenHeight() && 				
+				!EffectManager.getInstance().isEffectActive(Effect.Type.BOTTOM_WALL)) {					
 				ballLost(ball, bi);
 			}
 		}
@@ -652,34 +679,22 @@ public class Scene {
 			if (ball.getState() != Ball.State.STUCK_TO_PADDLE) {
 				if (Util.collisionTest(paddle.getBoundingBox(), ball.getBoundingBox())) {					
 //					final Edge edge = Util.getCollisionEdge(ball.getBoundingBox(), paddle.getBoundingBox());
+					
+					// Calculate reflection vector based on the formula
+					// V - Velocity Vector
+					// N - The Normal Vector of the plane
+					// Vnew = -2*(V dot N)*N + V
 													
-					Vector2f ballVector = new Vector2f();
-					ballVector.set(ball.getDeltaX(), ball.getDeltaY());
-					ballVector.setTheta(ball.getMovementAngleInDegrees());					
+					Vector ballVector = new Vector(ball.getDeltaX(), ball.getDeltaY(), ball.getMovementAngleInDegrees());					
+					Vector paddleVector =  new Vector(pdx, 1.0f, 0.0f);
+					Vector surfaceNormal = paddleVector.cross(ballVector).normalize();
 					
-					Vector2f paddleVector = new Vector2f();
-					paddleVector.set(pdx, 1.0f);
-					paddleVector.setTheta(0);
+					Vector result = surfaceNormal.mult(-2 * (ballVector.dot(surfaceNormal))).add(ballVector);
+					result = result.mult(Config.PADDLE_DAMPENING_FACTOR);					
+					result = result.add(paddleVector);
 					
-					Vector2f result = ballVector.add(paddleVector);
-//					result = result.set(result.getX(), result.getY() > 0 ? result.getY() * -1: 
-//																		   result.getY() * -1);
-
-					float newBallSpeed = result.length();
-					
-					// compromise realistic physics 
-					// for a better gameplay
-					if (newBallSpeed > Config.BALL_SPEED_MAX)
-						newBallSpeed = Config.BALL_SPEED_MAX;
-					else if (newBallSpeed < Config.BALL_SPEED_MIN)
-						newBallSpeed = Config.BALL_SPEED_MIN;
-					
-					ball.setMovementAngle((float) result.getTheta());
-					ball.setSpeed(newBallSpeed);
-					
-					// TODO: Fix this. It should not be necessary
-					ball.invertYVelocity();
-										
+					ball.setDeltaX(result.getX());
+					ball.setDeltaY(-result.getY());
 						
 					// avoid double collisions by placing the ball above the paddle
 					ball.setPosition(new Point(ball.getX(), paddle.getY() - (ball.getHeight() + 1.0f)));

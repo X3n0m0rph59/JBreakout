@@ -140,6 +140,9 @@ public final class Config {
 	/** Horizontal offset of the "Engine" particle systems */
 	public static final float PADDLE_ENGINE_OFFSET = 5.0f;
 	
+	/** Dampening factor for the collision between ball and paddle (Use 1.0f for a perfect elastic collision)*/
+	public static final float PADDLE_DAMPENING_FACTOR = 0.85f;
+	
 	public static final int STAR_DENSITY = 2;
 	public static final float STAR_WIDTH = 3.5f;
 	public static final float STAR_HEIGHT = 3.5f;
@@ -161,7 +164,8 @@ public final class Config {
 	public static final float SPACEBOMB_LURKING_SPEED = 1.5f;
 	public static final float SPACEBOMB_EXPLOSION_DURATION = 4.5f;
 	public static final float SPACEBOMB_EXPLOSION_RADIUS = 250.0f;
-	public static final int SPACEBOMB_DENSITY = SYNC_FPS * 25;
+	public static final int SPACEBOMB_DENSITY = SYNC_FPS * 60;
+	public static final int SPACEBOMB_COOLDOWN_TIME = SYNC_FPS * 25;
 	
 	public static final float GRAPPLING_HOOK_EXTEND_SPEED = 10.0f;
 	public static final float GRAPPLING_HOOK_LOWER_SPEED = GRAPPLING_HOOK_EXTEND_SPEED;

@@ -9,7 +9,8 @@ import org.newdawn.slick.Sound;
 
 
 enum Sounds { 
-	WELCOME, 
+	WELCOME,
+	
 	BRICK_HIT, 
 	SOLID_BRICK_HIT, 
 	PADDLE_HIT, 
@@ -22,6 +23,8 @@ enum Sounds {
 	GRAPPLING_HOOK_LOOP,
 	SPACEBOMB_LAUNCH,
 	SPACEBOMB_EXPLOSION,
+	
+	ACTION_DENIED,
 	QUIT,
 }
 
@@ -130,6 +133,7 @@ public final class SoundLayer {
 		soundMap.put(Sounds.GRAPPLING_HOOK_LOOP, new SoundSprite("grappling_hook.ogg"));
 		soundMap.put(Sounds.SPACEBOMB_LAUNCH, new SoundSprite("spacebomb_launch.ogg"));
 		soundMap.put(Sounds.SPACEBOMB_EXPLOSION, new SoundSprite("spacebomb_explosion.ogg"));
+		soundMap.put(Sounds.ACTION_DENIED, new SoundSprite("denied.ogg"));
 		soundMap.put(Sounds.QUIT, new SoundSprite("quit.ogg"));
 	}
 	
